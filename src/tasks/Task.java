@@ -36,15 +36,6 @@ public class Task {
         this.status = status;
     }
 
-    @Override
-    public String toString() {
-        return " Task{ " +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", status=" + status +
-                '}' + "\n";
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -59,5 +50,13 @@ public class Task {
         return Objects.hash(id, name, description, status);
     }
 
-
+    @Override
+    public String toString() {
+        return "Task{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                '}' + "\n";
+    }
 }

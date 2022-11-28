@@ -32,14 +32,24 @@ public class Main {
         System.out.println(manager.getSelectEpic(epicId1)); // получили 1 эпик
         manager.removeSelectEpic(epicId1); // удалили 1 эпик */
 
-
         Epic editing2 = manager.getSelectEpic(epicId2);
         editing2.setDescription("Дожили до дедлайна");
         System.out.println(manager.getEpics());
 
+        Subtask subtask1 = new Subtask("1 Подзадача к эпику 1", "Поставить ёлку", TaskStatus.NEW
+                , epicId1);
+        final int subtaskId1 = manager.addNewSubtask(subtask1); // добавили подзадачу к эпику 1
+        Subtask subtask2 = new Subtask("2 Подзадача к эпику 1", "Купить подарки", TaskStatus.NEW
+                , epicId1);
+        final int subtaskId2 = manager.addNewSubtask(subtask2); // добавили подзадачу к эпику 1
+        Subtask subtask3 = new Subtask("1 Подзадача к эпику 2", "Сдать ТЗ на итерацию", TaskStatus.NEW
+                , epicId2);
+        final int subtaskId3 = manager.addNewSubtask(subtask3); // добавили подзадачу к эпику 2
+        System.out.println(manager.getSubtask());
+        
 
 
-        System.out.println(manager);
+       System.out.println(manager);
 
 
 

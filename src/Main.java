@@ -56,16 +56,11 @@ public class Main {
 
         Subtask editing3 = manager.getSelectSubtask(subtaskId3);
         editing3.setDescription("Сдать ТЗ на 1 итерацию почти готово)");
-        editing3.setStatus(TaskStatus.IN_PROGRESS); //Проверяем выполнение подзадачи и перерасчета Эпика
+        editing3.setStatus(TaskStatus.DONE); //Проверяем выполнение подзадачи и перерасчета Эпика
         manager.updateSubtask(editing3);
-        System.out.println(manager.getSubtask());
         System.out.println(manager.getAllSubTaskForEpic(epicId1)); // Получаем Подзадачи определённого Эпика
-
-        //System.out.println(manager);
+        System.out.println(manager.getEpics()); // получилось)
+        
     }
 }
-/* Очень запоздалая "Version 1.02"
-*
-* Поправить прогресс
-* Стринг
-* */
+/* Очень запоздалая "Version 1.03" */

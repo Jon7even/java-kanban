@@ -1,5 +1,4 @@
 package tasks;
-
 import java.util.Objects;
 
 public class Task {
@@ -8,7 +7,6 @@ public class Task {
     protected String name;
     protected String description;
     protected TaskStatus status;
-
 
     public Task(String name, String description, TaskStatus status) {
         this.name = name;
@@ -34,6 +32,10 @@ public class Task {
 
     public void setStatus(TaskStatus status) {
         this.status = status;
+    }
+
+    public TaskStatus getStatus() {
+        return status;
     }
 
     @Override

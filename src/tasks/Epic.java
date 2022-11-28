@@ -1,5 +1,5 @@
 package tasks;
-
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -13,6 +13,7 @@ public class Epic extends Task {
     public void addSubtaskId(int id) {
         relationSubtaskId.add(id);
     }
+
     public ArrayList<Integer> getRelationSubtaskId() {
         return relationSubtaskId;
     }
@@ -24,6 +25,10 @@ public class Epic extends Task {
         } else {
             System.out.println("Статус уже " + TaskStatus.NEW);
         }
+    }
+
+    public void autoSetStatus(TaskStatus status) {
+        this.status = status;
     }
 
     @Override
@@ -42,8 +47,9 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
+
         return "Epic{" +
-                "relationSubtaskId=" + relationSubtaskId +
+                "relationSubtaskId=" + Arrays.toString(new ArrayList[]{relationSubtaskId}) +
                 ", id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +

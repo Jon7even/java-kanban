@@ -13,11 +13,6 @@ public class Subtask extends Task {
         return relationEpicId;
     }
 
-    public void setRelationEpicId(int relationEpicId) {
-        this.relationEpicId = relationEpicId;
-    }
-
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

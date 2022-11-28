@@ -17,6 +17,14 @@ public class Epic extends Task {
         return relationSubtaskId;
     }
 
+    @Override
+    public void setStatus(TaskStatus status) {
+        if (TaskStatus.IN_PROGRESS == status || TaskStatus.DONE == status) {
+            System.out.println("Ручное изменение статусов для Эпиков отключено по ТЗ");
+        } else {
+            System.out.println("Статус уже " + TaskStatus.NEW);
+        }
+    }
 
     @Override
     public boolean equals(Object o) {

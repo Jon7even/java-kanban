@@ -2,7 +2,7 @@ package tasks;
 import java.util.Objects;
 
 public class Subtask extends Task {
-    protected int relationEpicId; // к ID какого эпика относится подзадача
+    private final int relationEpicId; // к ID какого эпика относится подзадача
 
     public Subtask(String name, String description, TaskStatus status, int relationEpicId) {
         super(name, description, status);

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class Epic extends Task {
-    protected ArrayList<Integer> relationSubtaskId = new ArrayList<>();
+    private final ArrayList<Integer> relationSubtaskId = new ArrayList<>();
 
     public Epic(String name, String description, TaskStatus status) {
         super(name, description, status);
@@ -16,19 +16,6 @@ public class Epic extends Task {
 
     public ArrayList<Integer> getRelationSubtaskId() {
         return relationSubtaskId;
-    }
-
-    @Override
-    public void setStatus(TaskStatus status) {
-        if (TaskStatus.IN_PROGRESS == status || TaskStatus.DONE == status) {
-            System.out.println("Ручное изменение статусов для Эпиков отключено по ТЗ");
-        } else {
-            System.out.println("Статус уже " + TaskStatus.NEW);
-        }
-    }
-
-    public void autoSetStatus(TaskStatus status) {
-        this.status = status;
     }
 
     @Override

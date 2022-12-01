@@ -49,7 +49,7 @@ public class Main {
         final Integer subtaskId3 = manager.addNewSubtask(subtask3); // добавили Подзадачу к эпику 2
         System.out.println(manager.getSubtask());
 
-        /* manager.deleteAllSubtasks;// удалили все Подзадачи
+        /* manager.deleteAllSubtasks();// удалили все Подзадачи
         System.out.println(manager.getSubtask()); // вывели все Подзадачи
         System.out.println(manager.getSubtask(subtaskId2)); // получили 1 конкретную подзадачу
         manager.removeSubtask(subtaskId3); // удалили 1 подзадачу*/

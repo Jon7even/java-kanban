@@ -52,8 +52,8 @@ public class Manager {
         return new ArrayList<>(subTasks.values());
     }
 
-    public ArrayList<Subtask> getAllSubTaskForEpic(int idEpic) {
-        Epic epic = getEpic(idEpic);
+    public ArrayList<Subtask> getAllSubTaskForEpic(int id) {
+        Epic epic = getEpic(id);
         if (epic == null) {
             System.out.println("Такого Эпика нет, где-то подкралась ошибка.");
             return null;
@@ -68,7 +68,7 @@ public class Manager {
     }
 
     public void updateTask(Task task) {
-        if (task.getId() != 0) {
+        if (tasks.get(task.getId()) != null) {
             tasks.put(task.getId(), task);
         } else {
             System.out.println("Ошибка");
@@ -76,7 +76,7 @@ public class Manager {
     }
 
     public void updateEpic(Epic epic) {
-        if (epic.getId() != 0) {
+        if (epicTasks.get(epic.getId()) != null) {
             epicTasks.put(epic.getId(), epic);
             updateEpicStatus(epic);
         } else {
@@ -85,7 +85,7 @@ public class Manager {
     }
 
     public void updateSubtask(Subtask subtask) {
-        if (subtask.getId() != 0) {
+        if (subTasks.get(subtask.getId()) != null) {
             subTasks.put(subtask.getId(), subtask);
             Epic epic = getEpic(subtask.getRelationEpicId());
             updateEpicStatus(epic);
@@ -147,9 +147,9 @@ public class Manager {
         }
     }
 
-    public void removeEpic(int id) { // если есть возможность ответить... как лучше, вот такой проход циклом,
-        if (epicTasks.get(id) != null) { // или как в removeSubtask() 163, сначала создаем epic и т.д. второй вариант
-            for (Integer i : getEpic(id).getRelationSubtaskId()) {  // наглядней, а этот вариант компактней.
+    public void removeEpic(int id) {
+        if (epicTasks.get(id) != null) {
+            for (Integer i : getEpic(id).getRelationSubtaskId()) {
                 subTasks.remove(i);
             }
             epicTasks.remove(id);
@@ -169,7 +169,7 @@ public class Manager {
         }
     }
 
-    private void updateEpicStatus(Epic epic) { // Теперь лучше? Или топорно?:)
+    private void updateEpicStatus(Epic epic) {
         boolean isAllSubtaskNew = false; // проверка если все Подзадачи имеют статус NEW
         boolean isAllSubtaskDone = false; // проверка если все Подзадачи имеют статус DONE
 

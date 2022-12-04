@@ -12,7 +12,6 @@ public class Main {
 
         System.out.println(manager.getTaskAddLogs(idTask1)); // просмотрели 1
 
-
         Task editing1 = manager.getTask(idTask2); // получили Задачу 2
         editing1.setName("Очень нереальная задача 2"); // редактируем...
         manager.updateTask(editing1); // вносим правки
@@ -22,13 +21,12 @@ public class Main {
         final int epicId1 = manager.addNewEpic(epic1); // добавили простую Задачу
         Epic epic2 = new Epic("Эпичная Задача 2", "Доделать кухню", TaskStatus.NEW);
         final int epicId2 = manager.addNewEpic(epic2); // добавили простую Задачу
-        System.out.println(manager.getEpicAddLogs(epicId1)); // просмотрели 2
 
+        System.out.println(manager.getEpicAddLogs(epicId1)); // просмотрели 2
 
         Epic editing2 = manager.getEpic(epicId2);
         editing2.setDescription("Доделать кухню в каникулы");
         editing2.setStatus(TaskStatus.IN_PROGRESS);
-
         Subtask subtask1 = new Subtask("1 Подзадача к эпику 1", "Поставить ёлку", TaskStatus.NEW,
                 epicId1);
         final Integer subtaskId1 = manager.addNewSubtask(subtask1); // добавили подзадачу к эпику 1
@@ -39,9 +37,9 @@ public class Main {
                 epicId2);
         final Integer subtaskId3 = manager.addNewSubtask(subtask3);
 
-         System.out.println(manager.getSubtaskAddLogs(subtaskId3)); //просмотрели 3
+        System.out.println(manager.getSubtaskAddLogs(subtaskId3)); //просмотрели 3
 
-        System.out.println("История просмотренных тасков:\n" + manager.getHistory());
+        System.out.println(manager.getHistory());
 
     }
 }

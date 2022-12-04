@@ -4,7 +4,7 @@ import tasks.*;
 public class Main {
     public static void main(String[] args) {
 
-        Manager manager = new Manager();
+        TaskManager manager = Managers.getDefault();
         Task task1 = new Task("Простенькая задача 1", "Отжаться 10000 раз", TaskStatus.NEW);
         final int idTask1 = manager.addNewTask(task1); // добавили простую Задачу
         Task task2 = new Task("Простенькая задача 2", "Задача выспаться", TaskStatus.NEW);
@@ -67,6 +67,8 @@ public class Main {
         manager.updateSubtask(editing5);
         System.out.println(manager.getAllSubTaskForEpic(epicId1)); // Получаем Подзадачи определённого Эпика
         System.out.println(manager.getEpics());
+
+        System.out.println("История просмотренных тасков:\n" + manager.getHistory());
 
     }
 }

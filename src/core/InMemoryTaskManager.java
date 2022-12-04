@@ -1,5 +1,7 @@
 package core;
+
 import tasks.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +15,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     private int idGenerate = 0; // Генератор ID
 
-    protected InMemoryTaskManager (){}
+    protected InMemoryTaskManager() {
+    }
 
     @Override
     public int addNewTask(Task task) {
@@ -130,7 +133,17 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Task getTask(int id) {
+    public Task getTask(int id) { // метод внутренний
+        if (tasks.get(id) != null) {
+            return tasks.get(id);
+        } else {
+            System.out.println("Задача с идентификатором " + id + " не найдена!");
+        }
+        return null;
+    }
+
+    @Override
+    public Task getTaskAddLogs(int id) { // метод для интерфейса
         if (tasks.get(id) != null) {
             historyManager.addTask(tasks.get(id));
             return tasks.get(id);
@@ -141,7 +154,17 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Epic getEpic(int id) {
+    public Epic getEpic(int id) { // внутренний метод
+        if (epicTasks.get(id) != null) {
+            return epicTasks.get(id);
+        } else {
+            System.out.println("Эпик с идентификатором " + id + " не найден!");
+        }
+        return null;
+    }
+
+    @Override
+    public Epic getEpicAddLogs(int id) { // метод для интерфейса
         if (epicTasks.get(id) != null) {
             historyManager.addTask(epicTasks.get(id));
             return epicTasks.get(id);
@@ -153,6 +176,16 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Subtask getSubtask(int id) {
+        if (subTasks.get(id) != null) {
+            return subTasks.get(id);
+        } else {
+            System.out.println("Подзадачи с идентификатором " + id + " не найдено!");
+        }
+        return null;
+    }
+
+    @Override
+    public Subtask getSubtaskAddLogs(int id) {
         if (subTasks.get(id) != null) {
             historyManager.addTask(subTasks.get(id));
             return subTasks.get(id);
@@ -194,6 +227,7 @@ public class InMemoryTaskManager implements TaskManager {
             System.out.println("Эпик с идентификатором " + id + " не найден!");
         }
     }
+
     @Override
     public List<Task> getHistory() {
         return historyManager.getHistory();

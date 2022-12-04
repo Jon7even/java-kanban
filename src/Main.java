@@ -9,12 +9,9 @@ public class Main {
         final int idTask1 = manager.addNewTask(task1); // добавили простую Задачу
         Task task2 = new Task("Простенькая задача 2", "Задача выспаться", TaskStatus.NEW);
         final int idTask2 = manager.addNewTask(task2); // добавили простую Задачу
-        System.out.println(manager.getTasks()); // распечатываем
 
-       /*manager.deleteAllTasks();  // удалили все Задачи
-        System.out.println(manager.getTasks()); // вывели все простые Задачи
-        System.out.println(manager.getTask(idTask1)); // получили простую 1 Задачу
-        manager.removeTask(idTask1); // удаляем 1 Задачу*/
+        System.out.println(manager.getTaskAddLogs(idTask1)); // просмотрели 1
+
 
         Task editing1 = manager.getTask(idTask2); // получили Задачу 2
         editing1.setName("Очень нереальная задача 2"); // редактируем...
@@ -25,18 +22,12 @@ public class Main {
         final int epicId1 = manager.addNewEpic(epic1); // добавили простую Задачу
         Epic epic2 = new Epic("Эпичная Задача 2", "Доделать кухню", TaskStatus.NEW);
         final int epicId2 = manager.addNewEpic(epic2); // добавили простую Задачу
-        System.out.println(manager.getEpics());
+        System.out.println(manager.getEpicAddLogs(epicId1)); // просмотрели 2
 
-        /*manager.deleteAllEpics(); // удалили все Эпики
-        System.out.println(manager.getEpics()); // вывели все Эпики
-        System.out.println(manager.getEpic(epicId1)); // получили 1 Эпик
-        manager.removeEpic(epicId1); // удалили 1 Эпик */
 
         Epic editing2 = manager.getEpic(epicId2);
         editing2.setDescription("Доделать кухню в каникулы");
-        editing2.setStatus(TaskStatus.IN_PROGRESS); // проверяем на ручное изменение статуса
-        manager.updateEpic(editing2);
-        System.out.println(manager.getEpics());
+        editing2.setStatus(TaskStatus.IN_PROGRESS);
 
         Subtask subtask1 = new Subtask("1 Подзадача к эпику 1", "Поставить ёлку", TaskStatus.NEW,
                 epicId1);
@@ -46,30 +37,12 @@ public class Main {
         final Integer subtaskId2 = manager.addNewSubtask(subtask2); // добавили подзадачу к эпику 1
         Subtask subtask3 = new Subtask("1 Подзадача к эпику 2", "Заменить цоколь", TaskStatus.NEW,
                 epicId2);
-        final Integer subtaskId3 = manager.addNewSubtask(subtask3); // добавили Подзадачу к эпику 2
-        System.out.println(manager.getSubtask());
+        final Integer subtaskId3 = manager.addNewSubtask(subtask3);
 
-        /* manager.deleteAllSubtasks();// удалили все Подзадачи
-        System.out.println(manager.getSubtask()); // вывели все Подзадачи
-        System.out.println(manager.getSubtask(subtaskId2)); // получили 1 конкретную подзадачу
-        manager.removeSubtask(subtaskId3); // удалили 1 подзадачу*/
-
-        Subtask editing3 = manager.getSubtask(subtaskId1);
-        editing3.setStatus(TaskStatus.DONE);
-        manager.updateSubtask(editing3);
-
-        Subtask editing4 = manager.getSubtask(subtaskId2);
-        editing4.setStatus(TaskStatus.IN_PROGRESS);
-        manager.updateSubtask(editing4);
-
-        Subtask editing5 = manager.getSubtask(subtaskId3);
-        editing5.setStatus(TaskStatus.IN_PROGRESS); //Проверяем выполнение подзадачи и перерасчета Эпика
-        manager.updateSubtask(editing5);
-        System.out.println(manager.getAllSubTaskForEpic(epicId1)); // Получаем Подзадачи определённого Эпика
-        System.out.println(manager.getEpics());
+         System.out.println(manager.getSubtaskAddLogs(subtaskId3)); //просмотрели 3
 
         System.out.println("История просмотренных тасков:\n" + manager.getHistory());
 
     }
 }
-/*Version 1.04*/
+/*Version 2.06*/

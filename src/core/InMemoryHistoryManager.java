@@ -2,31 +2,26 @@ package core;
 
 import tasks.Task;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
+    private static final int HISTORY_SIZE = 10;
+    private final LinkedList<Task> history = new LinkedList<>();
 
-    private static final int LOG_SIZE = 10;
-    private final List<Task> tasksPrintLogs = new ArrayList<>();
-
-    InMemoryHistoryManager() {
+    public InMemoryHistoryManager() {
     }
 
     @Override
     public List<Task> getHistory() {
-        if (!(tasksPrintLogs.isEmpty())) {
-            return tasksPrintLogs;
-        } else {
-            return null;
-        }
+            return history;
     }
 
     @Override
     public void addTask(Task task) {
-        tasksPrintLogs.add(task);
-        if (tasksPrintLogs.size() > LOG_SIZE) {
-            tasksPrintLogs.remove(0);
+        history.add(task);
+        if (history.size() > HISTORY_SIZE) {
+            history.removeFirst();
         }
     }
 

@@ -1,7 +1,6 @@
 package core;
 
 public class Managers {
-
     private Managers() {
     }
 

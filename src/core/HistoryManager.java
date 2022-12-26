@@ -7,6 +7,8 @@ import tasks.Task;
 public interface HistoryManager {
     List<Task> getHistory();
 
-    void addTask(Task task);
+    void addHistoryTask(Task task);
+
+    void removeHistoryTask(int id);
 
 }

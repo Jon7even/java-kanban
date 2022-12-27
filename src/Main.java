@@ -28,11 +28,9 @@ public class Main {
         System.out.println("//Шаг 1 - запрашиваем задачи в произвольном порядке");
         System.out.println(manager.getTaskAddLogs(idTask1));
         System.out.println(manager.getTaskAddLogs(idTask2));
-        System.out.println(manager.getTaskAddLogs(idTask2));
         System.out.println(manager.getTaskAddLogs(idTask1));
-        System.out.println(manager.getEpicAddLogs(epicId1));
         System.out.println(manager.getEpicAddLogs(epicId2));
-        System.out.println(manager.getEpicAddLogs(epicId2));
+        System.out.println(manager.getTaskAddLogs(idTask1));
         System.out.println(manager.getSubtaskAddLogs(subtaskId3));
         System.out.println(manager.getSubtaskAddLogs(subtaskId1));
         System.out.println(manager.getSubtaskAddLogs(subtaskId2));
@@ -47,10 +45,8 @@ public class Main {
 
         System.out.println("//Шаг 4 - удаляем эпик с подзадачами и проверяем, что все удалилось из истории");
         manager.removeEpic(epicId1);
-        System.out.println(manager.getTaskAddLogs(idTask2));
         System.out.println(manager.getHistory());
         System.out.println(manager.getEpics());
-
     }
 }
-/*Version 2.09*/
+/*Version 2.10*/

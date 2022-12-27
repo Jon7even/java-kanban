@@ -3,7 +3,6 @@ package core;
 import tasks.Task;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.HashMap;
 
@@ -52,6 +51,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public void addHistoryTask(Task task) {
         int taskId = task.getId();
+
         if (nodeMap.containsKey(taskId)) {
             removeHistoryTask(taskId);
         }
@@ -75,8 +75,6 @@ public class InMemoryHistoryManager implements HistoryManager {
         if (nodeMap.containsKey(id)) {
             removeNode(nodeMap.get(id));
             nodeMap.remove(id);
-        } else {
-            System.out.println("Ошибка удаления истории");
         }
     }
 
@@ -84,15 +82,18 @@ public class InMemoryHistoryManager implements HistoryManager {
         if (node.prev != null && node.next != null) {
             node.prev.next = node.next;
             node.next.prev = node.prev;
-            System.out.println("Типа удалили из Середины");
+            System.out.println("Удалили из Середины");
+        } else if (node.prev == null && node.next == null) {
+            tail = null;
+            System.out.println("Удаление последней ноды");
         } else if (node.prev == null) {
             head = node.next;
             node.next.prev = null;
-            System.out.println("Типа удалили Голову");
+            System.out.println("Удалили Голову");
         } else {
             tail = node.prev;
             node.prev.next = null;
-            System.out.println("Типа удалили Хвост");
+            System.out.println("Удалили Хвост");
         }
 
     }

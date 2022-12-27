@@ -24,8 +24,8 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     private final HashMap<Integer, Node> nodeMap = new HashMap<>();
-    public Node head;
-    public Node tail;
+    private Node head;
+    private Node tail;
 
     @Override
     public List<Task> getHistory() {

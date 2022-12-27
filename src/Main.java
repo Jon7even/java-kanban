@@ -25,7 +25,7 @@ public class Main {
                 epicId1);
         final Integer subtaskId3 = manager.addNewSubtask(subtask3);
 
-        System.out.println("//Шаг 1 - запрашиваем задачи в произвольном порядке");
+        //Шаг 1 - запрашиваем задачи в произвольном порядке
         System.out.println(manager.getTaskAddLogs(idTask1));
         System.out.println(manager.getTaskAddLogs(idTask2));
         System.out.println(manager.getTaskAddLogs(idTask1));
@@ -36,17 +36,17 @@ public class Main {
         System.out.println(manager.getSubtaskAddLogs(subtaskId2));
         System.out.println(manager.getSubtaskAddLogs(subtaskId3));
 
-        System.out.println("//Шаг 2 - проверяем повторы в истории");
+        //Шаг 2 - проверяем повторы в истории
         System.out.println(manager.getHistory());
 
-        System.out.println("//Шаг 3 - удаляем задачу и проверяем, что они из истории тоже удалились");
+        //Шаг 3 - удаляем задачу и проверяем, что они из истории тоже удалились
         manager.removeTask(idTask1);
         System.out.println(manager.getHistory());
 
-        System.out.println("//Шаг 4 - удаляем эпик с подзадачами и проверяем, что все удалилось из истории");
+        //Шаг 4 - удаляем эпик с подзадачами и проверяем, что все удалилось из истории
         manager.removeEpic(epicId1);
         System.out.println(manager.getHistory());
-        System.out.println(manager.getEpics());
+
     }
 }
 /*Version 2.10*/

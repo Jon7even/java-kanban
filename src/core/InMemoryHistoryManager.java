@@ -82,18 +82,14 @@ public class InMemoryHistoryManager implements HistoryManager {
         if (node.prev != null && node.next != null) {
             node.prev.next = node.next;
             node.next.prev = node.prev;
-            System.out.println("Удалили из Середины");
         } else if (node.prev == null && node.next == null) {
             tail = null;
-            System.out.println("Удаление последней ноды");
         } else if (node.prev == null) {
             head = node.next;
             node.next.prev = null;
-            System.out.println("Удалили Голову");
         } else {
             tail = node.prev;
             node.prev.next = null;
-            System.out.println("Удалили Хвост");
         }
 
     }

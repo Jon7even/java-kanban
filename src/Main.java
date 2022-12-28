@@ -5,9 +5,10 @@ public class Main {
     public static void main(String[] args) {
 
         TaskManager manager = Managers.getDefault();
-        Task task1 = new Task("Задача 1", "Сходить в магазин", TaskStatus.NEW);
+        Task task1 = new Task("Задача 1", "Подарить хорошее настроение!", TaskStatus.NEW);
         final int idTask1 = manager.addNewTask(task1);
-        Task task2 = new Task("Задача 2", "Убраться в комнате", TaskStatus.NEW);
+        Task task2 = new Task("Задача 2", "Поздравить Ревьюера:) с наступающим 2023!",
+                TaskStatus.NEW);
         final int idTask2 = manager.addNewTask(task2);
 
         Epic epic1 = new Epic("Эпик 1", "Подготовка к новому году", TaskStatus.NEW);
@@ -35,7 +36,7 @@ public class Main {
         System.out.println(manager.getSubtask(subtaskId1));
         System.out.println(manager.getSubtask(subtaskId2));
         System.out.println(manager.getSubtask(subtaskId3));
-        manager.deleteAllSubtasks();
+
         //Шаг 2 - проверяем повторы в истории
         System.out.println(manager.getHistory());
 

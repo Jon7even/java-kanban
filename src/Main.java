@@ -45,7 +45,7 @@ public class Main {
 
         //Шаг 4 - удаляем эпик с подзадачами и проверяем, что все удалилось из истории
         manager.removeEpic(epicId1);
-        System.out.println(manager.getHistory())
+        System.out.println(manager.getHistory());
     }
 }
 /*Version 2.11*/

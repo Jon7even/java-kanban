@@ -17,7 +17,7 @@ public interface TaskManager {
 
     List<Epic> getEpics();
 
-    List<Subtask> getSubtask();
+    List<Subtask> getSubtasks();
 
     List<Subtask> getAllSubTaskForEpic(int id);
 
@@ -33,15 +33,9 @@ public interface TaskManager {
 
     void deleteAllEpics();
 
-    Task getTaskAddLogs(int id);
-
     Task getTask(int id);
 
-    Epic getEpicAddLogs(int id);
-
     Epic getEpic(int id);
-
-    Subtask getSubtaskAddLogs(int id);
 
     Subtask getSubtask(int id);
 

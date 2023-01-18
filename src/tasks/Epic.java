@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class Epic extends Task {
-    private final ArrayList<Integer> relationSubtaskId = new ArrayList<>();
+    protected final ArrayList<Integer> relationSubtaskId = new ArrayList<>();
 
-    public Epic(String name, String description, TaskStatus status) {
-        super(name, description, status);
+    public Epic(TaskType type, String name, String description, TaskStatus status) {
+        super(type, name, description, status);
     }
 
     public void addSubtaskId(int id) {
@@ -35,13 +35,14 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-
         return "Epic{" +
                 "relationSubtaskId=" + Arrays.toString(new ArrayList[]{relationSubtaskId}) +
                 ", id=" + id +
+                ", TypeTask='" + type + '\'' +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +
                 '}' + "\n";
     }
+
 }

@@ -5,11 +5,13 @@ import java.util.Objects;
 public class Task {
 
     protected int id;
+    protected TaskType type;
     protected String name;
     protected String description;
     protected TaskStatus status;
 
-    public Task(String name, String description, TaskStatus status) {
+    public Task(TaskType type, String name, String description, TaskStatus status) {
+        this.type = type;
         this.name = name;
         this.description = description;
         this.status = status;
@@ -27,8 +29,16 @@ public class Task {
         this.name = name;
     }
 
+    public String getName() {
+        return this.name;
+    }
+
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getDescription() {
+        return this.description;
     }
 
     public void setStatus(TaskStatus status) {
@@ -36,7 +46,11 @@ public class Task {
     }
 
     public TaskStatus getStatus() {
-        return status;
+        return this.status;
+    }
+
+    public TaskType getType() {
+        return this.type;
     }
 
     @Override
@@ -44,18 +58,20 @@ public class Task {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
-        return id == task.id && name.equals(task.name) && description.equals(task.description) && status == task.status;
+        return id == task.id && type == task.type && name.equals(task.name) && description.equals(task.description)
+                && status == task.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, status);
+        return Objects.hash(id, type, name, description, status);
     }
 
     @Override
     public String toString() {
         return "Task{" +
                 "id=" + id +
+                ", TypeTask='" + type + '\'' +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +

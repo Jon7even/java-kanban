@@ -3,15 +3,19 @@ package tasks;
 import java.util.Objects;
 
 public class Subtask extends Task {
-    private final int relationEpicId; // к ID какого эпика относится подзадача
+    private int relationEpicId; // к ID какого эпика относится подзадача
 
-    public Subtask(String name, String description, TaskStatus status, int relationEpicId) {
-        super(name, description, status);
+    public Subtask(TaskType type, String name, String description, TaskStatus status, int relationEpicId) {
+        super(type, name, description, status);
         this.relationEpicId = relationEpicId;
     }
 
     public int getRelationEpicId() {
-        return relationEpicId;
+        return this.relationEpicId;
+    }
+
+    public void setRelationEpicId(int id) {
+        this.relationEpicId = id;
     }
 
     @Override
@@ -32,10 +36,12 @@ public class Subtask extends Task {
     public String toString() {
         return "Subtask{" +
                 "relationEpicId=" + relationEpicId +
+                ", TypeTask='" + type + '\'' +
                 ", id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +
                 '}' + "\n";
     }
+
 }

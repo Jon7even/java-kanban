@@ -232,23 +232,24 @@ public class InMemoryTaskManager implements TaskManager {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        InMemoryTaskManager manager = (InMemoryTaskManager) o;
-        return idGenerate == manager.idGenerate && tasks.equals(manager.tasks) && epicTasks.equals(manager.epicTasks)
-                && subTasks.equals(manager.subTasks);
+        InMemoryTaskManager that = (InMemoryTaskManager) o;
+        return idGenerate == that.idGenerate && tasks.equals(that.tasks) && epicTasks.equals(that.epicTasks)
+                && subTasks.equals(that.subTasks) && historyManager.equals(that.historyManager);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(tasks, epicTasks, subTasks, idGenerate);
+        return Objects.hash(tasks, epicTasks, subTasks, historyManager, idGenerate);
     }
 
     @Override
     public String toString() {
-        return "Manager{" +
-                "tasks=" + tasks +
-                ", epicTasks=" + epicTasks +
-                ", subTasks=" + subTasks +
-                ", idGenerate=" + idGenerate +
+        return "InMemoryTaskManager{" +
+                ", idGenerate=" + idGenerate + "\n" +
+                "tasks=" + tasks + "\n" +
+                ", epicTasks=" + epicTasks + "\n" +
+                ", subTasks=" + subTasks + "\n" +
+                ", historyManager=" + historyManager + "\n" +
                 '}' + "\n";
     }
 }

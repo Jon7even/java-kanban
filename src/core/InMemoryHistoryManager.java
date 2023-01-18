@@ -5,6 +5,7 @@ import tasks.Task;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class InMemoryHistoryManager implements HistoryManager {
     public InMemoryHistoryManager() {
@@ -21,6 +22,12 @@ public class InMemoryHistoryManager implements HistoryManager {
             this.next = next;
         }
 
+        @Override
+        public String toString() {
+            return "Node{" +
+                    "task=" + task + "\n" +
+                    '}';
+        }
     }
 
     private final HashMap<Integer, Node> nodeMap = new HashMap<>();
@@ -85,7 +92,25 @@ public class InMemoryHistoryManager implements HistoryManager {
         } else {
             tail = prevNode;
         }
-
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        InMemoryHistoryManager that = (InMemoryHistoryManager) o;
+        return nodeMap.equals(that.nodeMap) && head.equals(that.head) && tail.equals(that.tail);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nodeMap, head, tail);
+    }
+
+    @Override
+    public String toString() {
+        return "HistoryManager{" +
+                "nodeMap=" + nodeMap +
+                '}' + "\n";
+    }
 }

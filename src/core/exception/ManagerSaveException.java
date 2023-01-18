@@ -1,4 +1,4 @@
-package core;
+package core.exception;
 
 public class ManagerSaveException extends RuntimeException {
     private ManagerSaveException() {

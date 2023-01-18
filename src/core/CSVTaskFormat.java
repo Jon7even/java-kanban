@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CSVTaskFormat {
-
     public static String toStringTask(Task task) {
         if (task.getType().equals(TaskType.SUBTASK)) {
             Subtask subtask = (Subtask) task;
@@ -49,11 +48,6 @@ public class CSVTaskFormat {
             str.append(task.getId()).append(",");
         }
         return str.toString();
-/*        String str = "";
-        for (Task task: history) {
-            str = str + task.getId() + ",";
-        }
-        return str;*/
     }
 
     public static List<Integer> historyFromString(String value) {

@@ -1,5 +1,7 @@
-import core.*;
-import tasks.*;
+package main.java;
+
+import main.java.core.*;
+import main.java.tasks.*;
 
 import java.io.File;
 
@@ -38,7 +40,8 @@ public class Main {
         System.out.println(manager.getSubtask(subtaskId3));
         System.out.println(manager.getHistory());*/
 
-        File file = new File("src" + File.separator + "resources" + File.separator + "task.csv");
+        File file = new File("src" + File.separator + "main" + File.separator + "resources" + File.separator
+                + "task.csv");
         FileBackedTasksManager fileBackedTasksManagerTest = FileBackedTasksManager.loadFromFile(file);
 
         System.out.println("Состояние восстановленного менеджера:");
@@ -52,4 +55,4 @@ public class Main {
         System.out.println(fileBackedTasksManagerTest.getHistory());
     }
 }
-/*Version 2.14*/
+/*Version 2.15*/

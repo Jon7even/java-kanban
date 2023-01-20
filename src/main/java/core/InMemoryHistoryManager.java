@@ -1,6 +1,6 @@
-package core;
+package main.java.core;
 
-import tasks.Task;
+import main.java.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;

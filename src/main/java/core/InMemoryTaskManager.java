@@ -1,6 +1,6 @@
-package core;
+package main.java.core;
 
-import tasks.*;
+import main.java.tasks.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -246,7 +246,7 @@ public class InMemoryTaskManager implements TaskManager {
     public String toString() {
         return "InMemoryTaskManager{" +
                 ", idGenerate=" + idGenerate + "\n" +
-                "tasks=" + tasks + "\n" +
+                "main.java.tasks=" + tasks + "\n" +
                 ", epicTasks=" + epicTasks + "\n" +
                 ", subTasks=" + subTasks + "\n" +
                 ", historyManager=" + historyManager + "\n" +

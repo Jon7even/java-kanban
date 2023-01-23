@@ -17,7 +17,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     public static FileBackedTasksManager loadFromFile(File file) {
         final FileBackedTasksManager tasksManager = new FileBackedTasksManager(file);
-
         List<String> lines = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
 

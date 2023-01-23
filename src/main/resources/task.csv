@@ -7,4 +7,4 @@ id,type,name,status,description,epic
 6,SUBTASK,2 Подзадача к эпику 1,DONE,Купить хороший фильтр,3,
 7,SUBTASK,3 Подзадача к эпику 1,IN_PROGRESS,Произвести замену,3,
  
-6,1,4,5,3,7,
+3,6,1,4,5,7,

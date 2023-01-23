@@ -277,10 +277,17 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         System.out.println(tasksManagerTest.getSubtask(subtaskId1));
         System.out.println(tasksManagerTest.getSubtask(subtaskId3));
         System.out.println(tasksManagerTest.getHistory());
+        System.out.println(tasksManagerTest.getTasks());
+        System.out.println(tasksManagerTest.getEpics());
+        System.out.println(tasksManagerTest.getSubtasks());
+        System.out.println(tasksManagerTest.getHistory());
 
         FileBackedTasksManager fileBackedTasksManagerTest = FileBackedTasksManager.loadFromFile(file);
         System.out.println(fileBackedTasksManagerTest.getHistory());
-        System.out.println(tasksManagerTest.getSubtask(subtaskId3));
+        System.out.println(fileBackedTasksManagerTest.getTasks());
+        System.out.println(fileBackedTasksManagerTest.getEpics());
+        System.out.println(fileBackedTasksManagerTest.getSubtasks());
+        System.out.println(fileBackedTasksManagerTest.getSubtask(subtaskId3));
 
     }
 

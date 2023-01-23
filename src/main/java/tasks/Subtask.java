@@ -3,7 +3,7 @@ package main.java.tasks;
 import java.util.Objects;
 
 public class Subtask extends Task {
-    private int relationEpicId; // к ID какого эпика относится подзадача
+    private final int relationEpicId; // к ID какого эпика относится подзадача
 
     public Subtask(TaskType type, String name, String description, TaskStatus status, int relationEpicId) {
         super(type, name, description, status);
@@ -12,10 +12,6 @@ public class Subtask extends Task {
 
     public int getRelationEpicId() {
         return this.relationEpicId;
-    }
-
-    public void setRelationEpicId(int id) {
-        this.relationEpicId = id;
     }
 
     @Override
@@ -34,14 +30,7 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return "Subtask{" +
-                "relationEpicId=" + relationEpicId +
-                ", TypeTask='" + type + '\'' +
-                ", id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", status=" + status +
-                '}' + "\n";
+        return id + "," + type + "," + name + "," + status + "," + description + "," + relationEpicId + ",\n";
     }
 
 }

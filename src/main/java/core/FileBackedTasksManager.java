@@ -5,11 +5,15 @@ import main.java.tasks.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static main.java.tasks.Task.DATE_TIME_FORMATTER;
+
 public class FileBackedTasksManager extends InMemoryTaskManager {
     private final File file;
+    private static final String columnNamesCSV = "id,type,name,status,description,epic,duration,startTime";
 
     private FileBackedTasksManager(File file) {
         this.file = file;
@@ -24,6 +28,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
             try (BufferedReader bufferedReader = new BufferedReader(new FileReader(String.valueOf(file),
                     StandardCharsets.UTF_8))) {
+                final String firstLine = bufferedReader.readLine();
+
+                if (firstLine == null || !firstLine.equals(columnNamesCSV)) {
+                    System.out.println("File is broken, recovery is impossible");
+                    return tasksManager;
+                }
+
                 while (bufferedReader.ready()) {
                     lines.add(bufferedReader.readLine());
                 }
@@ -35,7 +46,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
             List<Task> restoredTasks = new ArrayList<>();
 
-            for (int i = 1; i < lines.size() - 2; i++) {
+            for (int i = 0; i < lines.size() - 2; i++) {
                 restoredTasks.add(fromString(lines.get(i)));
             }
 
@@ -62,6 +73,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
             tasksManager.idGenerate = maxId;
 
+            if (sb.toString().isBlank()) {
+                return tasksManager;
+            }
+
             List<Integer> history = historyFromString(sb.toString());
 
             for (Integer id : history) {
@@ -71,6 +86,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     }
                 }
             }
+
         }
         return tasksManager;
     }
@@ -78,7 +94,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     private void save() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8))) {
 
-            writer.write("id,type,name,status,description,epic" + "\n");
+            writer.write(columnNamesCSV + "\n");
 
             for (Task task : tasks.values()) {
                 writer.write(task.toString());
@@ -89,8 +105,12 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             for (Task subtask : subTasks.values()) {
                 writer.write(subtask.toString());
             }
+
             writer.write(" " + "\n");
-            writer.write(historyToString(historyManager));
+
+            if (!historyManager.getHistory().isEmpty()) {
+                writer.write(historyToString(historyManager));
+            }
 
         } catch (IOException e) {
             throw new ManagerSaveException("Error: ", e);
@@ -200,20 +220,29 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         final String name = String.valueOf(values[2]);
         final TaskStatus status = TaskStatus.valueOf(values[3]);
         final String description = String.valueOf(values[4]);
+        final long duration = Long.parseLong((values[5]));
+        final LocalDateTime startTime;
+
+        if (String.valueOf(values[6]).equals("null")) {
+            startTime = null;
+        } else {
+            startTime = LocalDateTime.parse(values[6], DATE_TIME_FORMATTER);
+        }
+
         final Task task;
 
         switch (type) {
             case SUBTASK: {
-                final int epicId = Integer.parseInt(String.valueOf(values[5]));
-                task = new Subtask(type, name, description, status, epicId);
+                final int epicId = Integer.parseInt(String.valueOf(values[7]));
+                task = new Subtask(type, name, description, status, duration, startTime, epicId);
                 break;
             }
             case EPIC: {
-                task = new Epic(type, name, description, status);
+                task = new Epic(type, name, description, status, duration, startTime);
                 break;
             }
             case TASK: {
-                task = new Task(type, name, description, status);
+                task = new Task(type, name, description, status, duration, startTime);
                 break;
             }
             default: {

@@ -1,5 +1,6 @@
 package main.java.core;
 
+import main.java.core.exception.ManagerAddTaskException;
 import main.java.tasks.Epic;
 import main.java.tasks.Subtask;
 import main.java.tasks.Task;
@@ -7,7 +8,7 @@ import main.java.tasks.Task;
 import java.util.List;
 
 public interface TaskManager {
-    int addNewTask(Task task);
+    int addNewTask(Task task) throws ManagerAddTaskException;
 
     int addNewEpic(Epic epic);
 

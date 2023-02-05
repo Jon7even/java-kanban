@@ -34,15 +34,19 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public int addNewTask(Task task) {
         try {
-            if (!isConflictTimeIntersection(task.getStartTime(), task.getEndTime())) {
+            LocalDateTime startTime = task.getStartTime();
+            LocalDateTime endTime = task.getEndTime();
+
+            if (!isConflictTimeIntersection(startTime, endTime)) {
+                setIntervalsYearlyTimeTable(listsInterval(startTime, endTime));
                 int id = ++idGenerate;
                 task.setId(id);
                 tasks.put(id, task);
                 return id;
             } else {
                 throw new ManagerTimeIntersectionsException("Task overlap in time. Conflict in period: "
-                        + task.getStartTime().format(DATE_TIME_FORMATTER) + " - "
-                        + task.getEndTime().format(DATE_TIME_FORMATTER));
+                        + startTime.format(DATE_TIME_FORMATTER) + " - "
+                        + endTime.format(DATE_TIME_FORMATTER));
             }
         } catch (NullPointerException e) {
             throw new ManagerAddTaskException("Error, Task null cannot be passed: ", e);
@@ -64,11 +68,16 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Integer addNewSubtask(Subtask subtask) {
         try {
-            if (!isConflictTimeIntersection(subtask.getStartTime(), subtask.getEndTime())) {
+            LocalDateTime startTime = subtask.getStartTime();
+            LocalDateTime endTime = subtask.getEndTime();
+
+            if (!isConflictTimeIntersection(startTime, endTime)) {
                 Epic epic = getEpic(subtask.getRelationEpicId());
+
                 if (epic == null) {
                     return -1;
                 } else {
+                    setIntervalsYearlyTimeTable(listsInterval(startTime, endTime));
                     int id = ++idGenerate;
                     subtask.setId(id);
                     subTasks.put(id, subtask);
@@ -91,8 +100,8 @@ public class InMemoryTaskManager implements TaskManager {
                 }
             } else {
                 throw new ManagerTimeIntersectionsException("SubTask overlap in time. Conflict in period: "
-                        + subtask.getStartTime().format(DATE_TIME_FORMATTER) + " - "
-                        + subtask.getEndTime().format(DATE_TIME_FORMATTER));
+                        + startTime.format(DATE_TIME_FORMATTER) + " - "
+                        + endTime.format(DATE_TIME_FORMATTER));
             }
         } catch (NullPointerException e) {
             throw new ManagerAddTaskException("Error, Subtask null cannot be passed: ", e);
@@ -257,6 +266,16 @@ public class InMemoryTaskManager implements TaskManager {
         if (timeStart == timeEnd) {
             throw new ManagerTimeIntersectionsException("Duration of the task cannot be 0");
         }
+
+        for (Integer period : listsInterval(timeStart, timeEnd)) {
+            if (isBusyIntervalYearlyTimeTable(period)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<Integer> listsInterval(LocalDateTime timeStart, LocalDateTime timeEnd) {
         List<Integer> listsInterval = new ArrayList<>();
 
         int startPeriod = calculateDayOfYear(timeStart.getDayOfYear())
@@ -270,17 +289,7 @@ public class InMemoryTaskManager implements TaskManager {
                 listsInterval.add(i);
             }
         }
-
-        for (Integer period : listsInterval) {
-            if (isBusyIntervalYearlyTimeTable(period)) {
-                return true;
-            }
-        }
-
-        for (Integer period : listsInterval) {
-            setIntervalYearlyTimeTable(period, true);
-        }
-        return false;
+        return listsInterval;
     }
 
     private int calculateDayOfYear(int dayOfYear) {
@@ -296,7 +305,13 @@ public class InMemoryTaskManager implements TaskManager {
         return (int) Duration.between(defaultTimeDay, timeDay).toMinutes();
     }
 
-    public void setIntervalYearlyTimeTable(int period, boolean isBusy) {
+    private void setIntervalsYearlyTimeTable(List<Integer> listsInterval) {
+        for (Integer period : listsInterval) {
+            setPeriodYearlyTimeTable(period, true);
+        }
+    }
+
+    public void setPeriodYearlyTimeTable(int period, boolean isBusy) {
         yearlyTimeTable.put(period, isBusy);
     }
 

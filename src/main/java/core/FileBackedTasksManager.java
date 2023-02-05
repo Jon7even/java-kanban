@@ -67,8 +67,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             }
 
             for (Integer id : tasksManager.subTasks.keySet()) {
-                int epicId = tasksManager.getSubtask(id).getRelationEpicId();
-                tasksManager.getEpic(epicId).addSubtaskId(id);
+                int epicId = tasksManager.subTasks.get(id).getRelationEpicId();
+                tasksManager.epicTasks.get(epicId).addSubtaskId(id);
             }
 
             tasksManager.idGenerate = maxId;

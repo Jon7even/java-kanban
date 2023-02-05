@@ -65,8 +65,8 @@ public class Main {
 */
 
         System.out.println(tasksManagerTest.getYearlyTimeTable());
-        //FileBackedTasksManager fileBackedTasksManagerTest = FileBackedTasksManager.loadFromFile(file);
-        //System.out.println(fileBackedTasksManagerTest.getHistory());
+        FileBackedTasksManager fileBackedTasksManagerTest = FileBackedTasksManager.loadFromFile(file);
+        System.out.println(fileBackedTasksManagerTest.getHistory());
         //System.out.println(fileBackedTasksManagerTest.getTasks());
         // System.out.println(fileBackedTasksManagerTest.getEpics());
         // System.out.println(fileBackedTasksManagerTest.getSubtasks());

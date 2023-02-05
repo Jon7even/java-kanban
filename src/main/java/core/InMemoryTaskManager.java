@@ -72,30 +72,17 @@ public class InMemoryTaskManager implements TaskManager {
             LocalDateTime endTime = subtask.getEndTime();
 
             if (!isConflictTimeIntersection(startTime, endTime)) {
-                Epic epic = getEpic(subtask.getRelationEpicId());
-
+                Epic epic = epicTasks.get(subtask.getRelationEpicId());
                 if (epic == null) {
-                    return -1;
+                    throw new ManagerAddTaskException("Error, Epic null cannot be passed!");
                 } else {
                     setIntervalsYearlyTimeTable(listsInterval(startTime, endTime));
                     int id = ++idGenerate;
                     subtask.setId(id);
                     subTasks.put(id, subtask);
-
-                    if (epic.getEndTime() == null) {
-                        epic.setStartTime(subtask.getStartTime());
-                        epic.setEndTime(subtask.getEndTime());
-                    } else {
-                        if (epic.getStartTime().isAfter(subtask.getStartTime())) {
-                            epic.setStartTime(subtask.getStartTime());
-                        }
-                        if (epic.getEndTime().isBefore(subtask.getEndTime())) {
-                            epic.setEndTime(subtask.getEndTime());
-                        }
-                    }
-                    epic.setDuration(Duration.between(epic.getStartTime(), epic.getEndTime()).toMinutes());
                     epic.addSubtaskId(id);
-                    updateEpic(epic);
+                    updateEpicTime(epic);
+                    updateEpicStatus(epic);
                     return id;
                 }
             } else {
@@ -106,6 +93,36 @@ public class InMemoryTaskManager implements TaskManager {
         } catch (NullPointerException e) {
             throw new ManagerAddTaskException("Error, Subtask null cannot be passed: ", e);
         }
+    }
+
+    private void updateEpicTime(Epic epic) {
+        ArrayList<Integer> subtasks = epic.getRelationSubtaskId();
+
+        if (subtasks == null) {
+            epic.setDuration(0L);
+            epic.setStartTime(null);
+        } else {
+
+            for (Integer id : subtasks) {
+                Subtask subtask = subTasks.get(id);
+
+                if (epic.getEndTime() == null) {
+                    epic.setStartTime(subtask.getStartTime());
+                    epic.setEndTime(subtask.getEndTime());
+                } else {
+                    if (epic.getStartTime().isAfter(subtask.getStartTime())) {
+                        epic.setStartTime(subtask.getStartTime());
+                    }
+                    if (epic.getEndTime().isBefore(subtask.getEndTime())) {
+                        epic.setEndTime(subtask.getEndTime());
+                    }
+                }
+                epic.setDuration(Duration.between(epic.getStartTime(), epic.getEndTime()).toMinutes());
+            }
+
+        }
+
+
     }
 
     @Override
@@ -125,14 +142,14 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public ArrayList<Subtask> getAllSubTaskForEpic(int id) {
-        Epic epic = getEpic(id);
+        Epic epic = epicTasks.get(id);
         if (epic == null) {
-            return null;
+            throw new ManagerAddTaskException("Error, Epic null cannot be passed!");
         } else {
             ArrayList<Subtask> subtask = new ArrayList<>();
             ArrayList<Integer> search = epic.getRelationSubtaskId();
             for (Integer i : search) {
-                subtask.add(getSubtask(i));
+                subtask.add(subTasks.get(i));
             }
             return subtask;
         }
@@ -161,7 +178,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateSubtask(Subtask subtask) {
         try {
             subTasks.put(subtask.getId(), subtask);
-            Epic epic = getEpic(subtask.getRelationEpicId());
+            Epic epic = epicTasks.get(subtask.getRelationEpicId());
             updateEpicStatus(epic);
         } catch (NullPointerException e) {
             throw new ManagerAddTaskException("Error, Subtask null cannot be passed: ", e);
@@ -237,7 +254,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeEpic(int id) {
         if (epicTasks.get(id) != null) {
-            for (Integer i : getEpic(id).getRelationSubtaskId()) {
+            for (Integer i : epicTasks.get(id).getRelationSubtaskId()) {
                 subTasks.remove(i);
                 historyManager.removeHistoryTask(i);
             }
@@ -249,7 +266,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeSubtask(Integer id) {
         if (subTasks.get(id) != null) {
-            Epic epic = getEpic(subTasks.get(id).getRelationEpicId());
+            Epic epic = epicTasks.get(subTasks.get(id).getRelationEpicId());
             epic.getRelationSubtaskId().remove(id);
             updateEpicStatus(epic);
             subTasks.remove(id);
@@ -319,15 +336,16 @@ public class InMemoryTaskManager implements TaskManager {
         return yearlyTimeTable.get(period);
     }
 
+
     private void updateEpicStatus(Epic epic) {
         boolean isAllSubtaskNew = false;
         boolean isAllSubtaskDone = false;
 
-        ArrayList<Integer> search = epic.getRelationSubtaskId();
+        ArrayList<Integer> subtasks = epic.getRelationSubtaskId();
         int counterSubtaskNew = 0;
         int counterSubtaskDone = 0;
-        for (Integer i : search) {
-            Task task = getSubtask(i);
+        for (Integer i : subtasks) {
+            Task task = subTasks.get(i);
             if (task.getStatus() == TaskStatus.NEW) {
                 counterSubtaskNew++;
             }
@@ -335,10 +353,10 @@ public class InMemoryTaskManager implements TaskManager {
                 counterSubtaskDone++;
             }
         }
-        if (counterSubtaskNew == search.size()) {
+        if (counterSubtaskNew == subtasks.size()) {
             isAllSubtaskNew = true;
         }
-        if (counterSubtaskDone == search.size()) {
+        if (counterSubtaskDone == subtasks.size()) {
             isAllSubtaskDone = true;
         }
 

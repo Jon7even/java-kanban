@@ -25,7 +25,7 @@ public class Task {
     }
 
     public Task(TaskType type, String name, String description, TaskStatus status, long duration,
-        LocalDateTime startTime) {
+                LocalDateTime startTime) {
         this.type = type;
         this.name = name;
         this.description = description;

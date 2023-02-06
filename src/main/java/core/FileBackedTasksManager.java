@@ -249,7 +249,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 throw new IllegalStateException(String.format("Incorrect task type: %s", type));
             }
         }
-
         task.setId(id);
         return task;
     }

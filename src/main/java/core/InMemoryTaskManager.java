@@ -38,7 +38,7 @@ public class InMemoryTaskManager implements TaskManager {
             LocalDateTime endTime = task.getEndTime();
 
             if (!isConflictTimeIntersection(startTime, endTime)) {
-                setIntervalsYearlyTimeTable(listsInterval(startTime, endTime));
+                setIntervalsYearlyTimeTable(listsInterval(startTime, endTime), true);
                 int id = ++idGenerate;
                 task.setId(id);
                 tasks.put(id, task);
@@ -76,7 +76,7 @@ public class InMemoryTaskManager implements TaskManager {
                 if (epic == null) {
                     throw new ManagerAddTaskException("Error, Epic null cannot be passed!");
                 } else {
-                    setIntervalsYearlyTimeTable(listsInterval(startTime, endTime));
+                    setIntervalsYearlyTimeTable(listsInterval(startTime, endTime), true);
                     int id = ++idGenerate;
                     subtask.setId(id);
                     subTasks.put(id, subtask);
@@ -98,30 +98,32 @@ public class InMemoryTaskManager implements TaskManager {
     private void updateEpicTime(Epic epic) {
         ArrayList<Integer> subtasks = epic.getRelationSubtaskId();
 
-        if (subtasks == null) {
+        if (subtasks.size() == 0) {
             epic.setDuration(0L);
             epic.setStartTime(null);
         } else {
-
             for (Integer id : subtasks) {
                 Subtask subtask = subTasks.get(id);
+                LocalDateTime subtaskStartTime = subtask.getStartTime();
+                LocalDateTime subtaskEndTime = subtask.getEndTime();
 
                 if (epic.getEndTime() == null) {
-                    epic.setStartTime(subtask.getStartTime());
-                    epic.setEndTime(subtask.getEndTime());
+                    epic.setStartTime(subtaskStartTime);
+                    epic.setEndTime(subtaskEndTime);
+                    epic.setDuration(Duration.between(epic.getStartTime(), epic.getEndTime()).toMinutes());
                 } else {
-                    if (epic.getStartTime().isAfter(subtask.getStartTime())) {
-                        epic.setStartTime(subtask.getStartTime());
+                    if (epic.getStartTime().isAfter(subtaskStartTime)) {
+                        epic.setStartTime(subtaskStartTime);
                     }
-                    if (epic.getEndTime().isBefore(subtask.getEndTime())) {
-                        epic.setEndTime(subtask.getEndTime());
+                    if (epic.getEndTime().isBefore(subtaskEndTime)) {
+                        epic.setEndTime(subtaskEndTime);
                     }
+                    epic.setDuration(Duration.between(epic.getStartTime(), epic.getEndTime()).toMinutes());
                 }
-                epic.setDuration(Duration.between(epic.getStartTime(), epic.getEndTime()).toMinutes());
+
             }
 
         }
-
 
     }
 
@@ -158,7 +160,26 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateTask(Task task) {
         try {
-            tasks.put(task.getId(), task);
+            int idTask = task.getId();
+            LocalDateTime startTime = task.getStartTime();
+            LocalDateTime endTime = task.getEndTime();
+            LocalDateTime oldStartTime = tasks.get(idTask).getStartTime();
+            LocalDateTime oldEndTime = tasks.get(idTask).getEndTime();
+            List<Integer> oldTimeInterval = listsInterval(oldStartTime, oldEndTime);
+
+            if (oldTimeInterval.equals(listsInterval(startTime, endTime))) {
+                tasks.put(idTask, task);
+            } else {
+                setIntervalsYearlyTimeTable(oldTimeInterval, false);
+                if (!isConflictTimeIntersection(startTime, endTime)) {
+                    setIntervalsYearlyTimeTable(listsInterval(startTime, endTime), true);
+                    tasks.put(idTask, task);
+                } else {
+                    throw new ManagerTimeIntersectionsException("Task overlap in time. Conflict in period: "
+                            + startTime.format(DATE_TIME_FORMATTER) + " - "
+                            + endTime.format(DATE_TIME_FORMATTER));
+                }
+            }
         } catch (NullPointerException e) {
             throw new ManagerAddTaskException("Error, Task null cannot be passed: ", e);
         }
@@ -169,6 +190,7 @@ public class InMemoryTaskManager implements TaskManager {
         try {
             epicTasks.put(epic.getId(), epic);
             updateEpicStatus(epic);
+            updateEpicTime(epic);
         } catch (NullPointerException e) {
             throw new ManagerAddTaskException("Error, Epic null cannot be passed: ", e);
         }
@@ -177,9 +199,32 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateSubtask(Subtask subtask) {
         try {
-            subTasks.put(subtask.getId(), subtask);
-            Epic epic = epicTasks.get(subtask.getRelationEpicId());
-            updateEpicStatus(epic);
+            int idSubtask = subtask.getId();
+            LocalDateTime startTime = subtask.getStartTime();
+            LocalDateTime endTime = subtask.getEndTime();
+            LocalDateTime oldStartTime = subTasks.get(idSubtask).getStartTime();
+            LocalDateTime oldEndTime = subTasks.get(idSubtask).getEndTime();
+            List<Integer> oldTimeInterval = listsInterval(oldStartTime, oldEndTime);
+
+            if (oldTimeInterval.equals(listsInterval(startTime, endTime))) {
+                subTasks.put(idSubtask, subtask);
+                Epic epic = epicTasks.get(subtask.getRelationEpicId());
+                updateEpicStatus(epic);
+                updateEpicTime(epic);
+            } else {
+                setIntervalsYearlyTimeTable(oldTimeInterval, false);
+                if (!isConflictTimeIntersection(startTime, endTime)) {
+                    setIntervalsYearlyTimeTable(listsInterval(startTime, endTime), true);
+                    subTasks.put(idSubtask, subtask);
+                    Epic epic = epicTasks.get(subtask.getRelationEpicId());
+                    updateEpicStatus(epic);
+                    updateEpicTime(epic);
+                } else {
+                    throw new ManagerTimeIntersectionsException("Task overlap in time. Conflict in period: "
+                            + startTime.format(DATE_TIME_FORMATTER) + " - "
+                            + endTime.format(DATE_TIME_FORMATTER));
+                }
+            }
         } catch (NullPointerException e) {
             throw new ManagerAddTaskException("Error, Subtask null cannot be passed: ", e);
         }
@@ -187,8 +232,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteAllTasks() {
-        for (Integer i : tasks.keySet()) {
-            historyManager.removeHistoryTask(i);
+        for (Integer id : tasks.keySet()) {
+            historyManager.removeHistoryTask(id);
+            setIntervalsYearlyTimeTable(listsInterval(tasks.get(id).getStartTime(),
+                    tasks.get(id).getEndTime()), false);
         }
         tasks.clear();
     }
@@ -197,8 +244,13 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteAllSubtasks() {
         for (Epic epic : epicTasks.values()) {
             if (!epic.getRelationSubtaskId().isEmpty()) {
+                for (Integer id : epic.getRelationSubtaskId()) {
+                    setIntervalsYearlyTimeTable(listsInterval(subTasks.get(id).getStartTime(),
+                            subTasks.get(id).getEndTime()), false);
+                }
                 epic.getRelationSubtaskId().clear();
                 updateEpicStatus(epic);
+                updateEpicTime(epic);
             }
         }
         for (Integer i : subTasks.keySet()) {
@@ -246,6 +298,8 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeTask(int id) {
         if (tasks.get(id) != null) {
+            setIntervalsYearlyTimeTable(listsInterval(tasks.get(id).getStartTime(), tasks.get(id).getEndTime()),
+                    false);
             tasks.remove(id);
             historyManager.removeHistoryTask(id);
         }
@@ -269,8 +323,12 @@ public class InMemoryTaskManager implements TaskManager {
             Epic epic = epicTasks.get(subTasks.get(id).getRelationEpicId());
             epic.getRelationSubtaskId().remove(id);
             updateEpicStatus(epic);
+            setIntervalsYearlyTimeTable(listsInterval(subTasks.get(id).getStartTime(), subTasks.get(id).getEndTime()),
+                    false);
             subTasks.remove(id);
             historyManager.removeHistoryTask(id);
+            updateEpicTime(epic);
+
         }
     }
 
@@ -322,9 +380,9 @@ public class InMemoryTaskManager implements TaskManager {
         return (int) Duration.between(defaultTimeDay, timeDay).toMinutes();
     }
 
-    private void setIntervalsYearlyTimeTable(List<Integer> listsInterval) {
+    private void setIntervalsYearlyTimeTable(List<Integer> listsInterval, Boolean isBusy) {
         for (Integer period : listsInterval) {
-            setPeriodYearlyTimeTable(period, true);
+            setPeriodYearlyTimeTable(period, isBusy);
         }
     }
 

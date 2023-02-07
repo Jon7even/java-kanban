@@ -43,12 +43,12 @@ public class Epic extends Task {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Epic epic = (Epic) o;
-        return relationSubtaskId.equals(epic.relationSubtaskId);
+        return Objects.equals(relationSubtaskId, epic.relationSubtaskId) && Objects.equals(endTime, epic.endTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), relationSubtaskId);
+        return Objects.hash(super.hashCode(), relationSubtaskId, endTime);
     }
 
     @Override

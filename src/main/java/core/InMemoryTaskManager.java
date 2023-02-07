@@ -218,7 +218,7 @@ public class InMemoryTaskManager implements TaskManager {
                 for (Integer id : epic.getRelationSubtaskId()) {
                     prioritizedTasks.remove(subTasks.get(id));
                     setIntervalsYearlyTimeTable(listsInterval(subTasks.get(id).getStartTime(),
-                        subTasks.get(id).getEndTime()), false);
+                            subTasks.get(id).getEndTime()), false);
                     historyManager.removeHistoryTask(id);
                 }
                 epic.getRelationSubtaskId().clear();

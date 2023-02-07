@@ -50,6 +50,10 @@ public class Task {
         return startTime;
     }
 
+    public Boolean test() {
+        return startTime != null;
+    }
+
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }

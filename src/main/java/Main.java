@@ -6,8 +6,6 @@ import main.java.tasks.*;
 import java.io.File;
 import java.time.LocalDateTime;
 
-import static main.java.tasks.Task.DATE_TIME_FORMATTER;
-
 public class Main {
 
     public static void main(String[] args) {
@@ -51,12 +49,13 @@ public class Main {
 
         Subtask subtaskUpdate1 = new Subtask(TaskType.SUBTASK, "1 Подзадача к эпику 1",
                 "Описание Подзадачи 1", TaskStatus.DONE, 15,
-                LocalDateTime.of(2023, 1, 1, 1, 3), epicId1);
-
+                LocalDateTime.of(2023, 1, 1, 2, 3), epicId1);
+        System.out.println(tasksManagerTest.getSubtask(subtaskId2));
         subtaskUpdate1.setId(subtaskId1);
         tasksManagerTest.updateSubtask(subtaskUpdate1);
-
-        System.out.println(tasksManagerTest.getYearlyTimeTable());
+        tasksManagerTest.deleteAllEpics();
+        System.out.println(tasksManagerTest.getPrioritizedTasks());
+        //System.out.println(tasksManagerTest.getYearlyTimeTable());
 
     }
 }

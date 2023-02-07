@@ -13,7 +13,7 @@ public class Main {
         File file = new File("src" + File.separator + "main" + File.separator + "resources" + File.separator
                 + "task.csv");
 
-        FileBackedTasksManager tasksManagerTest = FileBackedTasksManager.loadFromFile(file);
+/*        FileBackedTasksManager tasksManagerTest = FileBackedTasksManager.loadFromFile(file);
 
         Task task1 = new Task(TaskType.TASK, "Задача 1", "Описание Задача 1",
                 TaskStatus.NEW, 15, LocalDateTime.of(2023, 1, 1, 0, 2));
@@ -35,8 +35,6 @@ public class Main {
         Epic epic2 = new Epic(TaskType.EPIC, "Эпик 2", "описание Эпик 2", TaskStatus.NEW);
         final int epicId2 = tasksManagerTest.addNewEpic(epic2);
 
-        System.out.println(tasksManagerTest.getTask(epicId2));
-
         Subtask subtask1 = new Subtask(TaskType.SUBTASK, "1 Подзадача к эпику 1", "Описание Подзадачи 1",
                 TaskStatus.DONE, 15, LocalDateTime.of(2023, 1, 1, 1, 3),
                 epicId1);
@@ -53,9 +51,16 @@ public class Main {
         System.out.println(tasksManagerTest.getSubtask(subtaskId2));
         subtaskUpdate1.setId(subtaskId1);
         tasksManagerTest.updateSubtask(subtaskUpdate1);
-        tasksManagerTest.deleteAllEpics();
-        System.out.println(tasksManagerTest.getPrioritizedTasks());
-        //System.out.println(tasksManagerTest.getYearlyTimeTable());
 
+        System.out.println(tasksManagerTest.getPrioritizedTasks());*/
+
+
+        FileBackedTasksManager tasksManagerFBTest = FileBackedTasksManager.loadFromFile(file);
+        System.out.println(tasksManagerFBTest.getTasks());
+        System.out.println(tasksManagerFBTest.getEpics());
+        System.out.println(tasksManagerFBTest.getSubtasks());
+        System.out.println(tasksManagerFBTest.getHistory());
+        System.out.println(tasksManagerFBTest.getPrioritizedTasks());
+        System.out.println(tasksManagerFBTest.getYearlyTimeTable());
     }
 }

@@ -86,6 +86,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     }
                 }
             }
+            tasksManager.updateYearlyTimeTable();
+            tasksManager.prioritizedTasks.addAll(tasksManager.tasks.values());
+            tasksManager.prioritizedTasks.addAll(tasksManager.subTasks.values());
 
         }
         return tasksManager;

@@ -8,7 +8,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.stream.Stream;
 
 import static main.java.tasks.Task.DATE_TIME_FORMATTER;
 
@@ -174,6 +173,7 @@ public class InMemoryTaskManager implements TaskManager {
             LocalDateTime oldStartTime = subTasks.get(idSubtask).getStartTime();
             LocalDateTime oldEndTime = subTasks.get(idSubtask).getEndTime();
             List<Integer> oldTimeInterval = listsInterval(oldStartTime, oldEndTime);
+
             prioritizedTasks.remove(subTasks.get(idSubtask));
             prioritizedTasks.add(subtask);
             if (oldTimeInterval.equals(listsInterval(startTime, endTime))) {
@@ -328,8 +328,6 @@ public class InMemoryTaskManager implements TaskManager {
         return yearlyTimeTable;
     }
 
-
-
     private void updateEpicTime(Epic epic) {
         ArrayList<Integer> subtasks = epic.getRelationSubtaskId();
 
@@ -377,6 +375,39 @@ public class InMemoryTaskManager implements TaskManager {
             }
         }
         return listsInterval;
+    }
+
+    protected void updateYearlyTimeTable() {
+        for (Task task : tasks.values()) {
+            LocalDateTime startTime = task.getStartTime();
+            LocalDateTime endTime = task.getEndTime();
+
+            if (!isConflictTimeIntersection(startTime, endTime)) {
+                setIntervalsYearlyTimeTable(listsInterval(startTime, endTime), true);
+            } else {
+                throw new ManagerTimeIntersectionsException("Task overlap in time. Conflict in period: "
+                        + startTime.format(DATE_TIME_FORMATTER) + " - "
+                        + endTime.format(DATE_TIME_FORMATTER));
+            }
+        }
+
+        for (Subtask subtask : subTasks.values()) {
+            LocalDateTime startTime = subtask.getStartTime();
+            LocalDateTime endTime = subtask.getEndTime();
+
+            if (!isConflictTimeIntersection(startTime, endTime)) {
+                setIntervalsYearlyTimeTable(listsInterval(startTime, endTime), true);
+            } else {
+                throw new ManagerTimeIntersectionsException("Task overlap in time. Conflict in period: "
+                        + startTime.format(DATE_TIME_FORMATTER) + " - "
+                        + endTime.format(DATE_TIME_FORMATTER));
+            }
+        }
+
+        for (Epic epic : epicTasks.values()) {
+            updateEpicTime(epic);
+        }
+
     }
 
     private int calculateDayOfYear(int dayOfYear) {

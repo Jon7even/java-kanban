@@ -1,6 +1,8 @@
 package main.java.core;
 
 import main.java.core.exception.ManagerAddTaskException;
+import main.java.core.exception.ManagerGetTaskException;
+import main.java.core.exception.ManagerRemoveTaskException;
 import main.java.core.exception.ManagerTimeIntersectionsException;
 import main.java.tasks.*;
 
@@ -47,7 +49,7 @@ public class InMemoryTaskManager implements TaskManager {
                         + endTime.format(DATE_TIME_FORMATTER));
             }
         } catch (NullPointerException e) {
-            throw new ManagerAddTaskException("Error, Task null cannot be passed: ", e);
+            throw new ManagerAddTaskException("Error, Task cannot be passed: ", e);
         }
     }
 
@@ -59,7 +61,7 @@ public class InMemoryTaskManager implements TaskManager {
             epicTasks.put(id, epic);
             return id;
         } catch (NullPointerException e) {
-            throw new ManagerAddTaskException("Error, Epic null cannot be passed: ", e);
+            throw new ManagerAddTaskException("Error, Epic cannot be passed: ", e);
         }
     }
 
@@ -73,7 +75,7 @@ public class InMemoryTaskManager implements TaskManager {
                 prioritizedTasks.add(subtask);
                 Epic epic = epicTasks.get(subtask.getRelationEpicId());
                 if (epic == null) {
-                    throw new ManagerAddTaskException("Error, Epic null cannot be passed!");
+                    throw new ManagerGetTaskException("Error, Epic cannot be received!");
                 } else {
                     setIntervalsYearlyTimeTable(listsInterval(startTime, endTime), true);
                     int id = ++idGenerate;
@@ -90,7 +92,7 @@ public class InMemoryTaskManager implements TaskManager {
                         + endTime.format(DATE_TIME_FORMATTER));
             }
         } catch (NullPointerException e) {
-            throw new ManagerAddTaskException("Error, Subtask null cannot be passed: ", e);
+            throw new ManagerAddTaskException("Error, Subtask cannot be passed: ", e);
         }
     }
 
@@ -113,14 +115,18 @@ public class InMemoryTaskManager implements TaskManager {
     public ArrayList<Subtask> getAllSubTaskForEpic(int id) {
         Epic epic = epicTasks.get(id);
         if (epic == null) {
-            throw new ManagerAddTaskException("Error, Epic null cannot be passed!");
+            throw new ManagerGetTaskException("Error, Epic with id " + id + " cannot be received!");
         } else {
-            ArrayList<Subtask> subtask = new ArrayList<>();
-            ArrayList<Integer> search = epic.getRelationSubtaskId();
-            for (Integer i : search) {
-                subtask.add(subTasks.get(i));
+            List<Integer> idSubtasks = epic.getRelationSubtaskId();
+            if (idSubtasks != null) {
+                ArrayList<Subtask> subtask = new ArrayList<>();
+                for (Integer idGet : idSubtasks) {
+                    subtask.add(subTasks.get(idGet));
+                }
+                return subtask;
+            } else {
+                throw new ManagerGetTaskException("Error, Subtasks not found!");
             }
-            return subtask;
         }
     }
 
@@ -133,6 +139,7 @@ public class InMemoryTaskManager implements TaskManager {
             LocalDateTime oldStartTime = tasks.get(idTask).getStartTime();
             LocalDateTime oldEndTime = tasks.get(idTask).getEndTime();
             List<Integer> oldTimeInterval = listsInterval(oldStartTime, oldEndTime);
+
             prioritizedTasks.remove(tasks.get(idTask));
             prioritizedTasks.add(task);
             if (oldTimeInterval.equals(listsInterval(startTime, endTime))) {
@@ -149,7 +156,7 @@ public class InMemoryTaskManager implements TaskManager {
                 }
             }
         } catch (NullPointerException e) {
-            throw new ManagerAddTaskException("Error, Task null cannot be passed: ", e);
+            throw new ManagerAddTaskException("Error, Task cannot be passed: ", e);
         }
     }
 
@@ -160,7 +167,7 @@ public class InMemoryTaskManager implements TaskManager {
             updateEpicStatus(epic);
             updateEpicTime(epic);
         } catch (NullPointerException e) {
-            throw new ManagerAddTaskException("Error, Epic null cannot be passed: ", e);
+            throw new ManagerAddTaskException("Error, Epic cannot be passed: ", e);
         }
     }
 
@@ -196,7 +203,7 @@ public class InMemoryTaskManager implements TaskManager {
                 }
             }
         } catch (NullPointerException e) {
-            throw new ManagerAddTaskException("Error, Subtask null cannot be passed: ", e);
+            throw new ManagerAddTaskException("Error, Subtask cannot be passed: ", e);
         }
     }
 
@@ -243,8 +250,9 @@ public class InMemoryTaskManager implements TaskManager {
         if (tasks.get(id) != null) {
             historyManager.addHistoryTask(tasks.get(id));
             return tasks.get(id);
+        } else {
+            throw new ManagerGetTaskException("Error, Task with id " + id + " cannot be received!");
         }
-        return null;
     }
 
     @Override
@@ -252,8 +260,9 @@ public class InMemoryTaskManager implements TaskManager {
         if (epicTasks.get(id) != null) {
             historyManager.addHistoryTask(epicTasks.get(id));
             return epicTasks.get(id);
+        } else {
+            throw new ManagerGetTaskException("Error, Epic with id " + id + " cannot be received!");
         }
-        return null;
     }
 
     @Override
@@ -261,8 +270,9 @@ public class InMemoryTaskManager implements TaskManager {
         if (subTasks.get(id) != null) {
             historyManager.addHistoryTask(subTasks.get(id));
             return subTasks.get(id);
+        } else {
+            throw new ManagerGetTaskException("Error, Subtask with id " + id + " cannot be received!");
         }
-        return null;
     }
 
     @Override
@@ -272,6 +282,8 @@ public class InMemoryTaskManager implements TaskManager {
                     false);
             tasks.remove(id);
             historyManager.removeHistoryTask(id);
+        } else {
+            throw new ManagerRemoveTaskException("Error, Task with id " + id + " cannot be deleted!");
         }
     }
 
@@ -284,6 +296,8 @@ public class InMemoryTaskManager implements TaskManager {
             }
             epicTasks.remove(id);
             historyManager.removeHistoryTask(id);
+        } else {
+            throw new ManagerRemoveTaskException("Error, Epic with id " + id + " cannot be deleted!");
         }
     }
 
@@ -298,7 +312,8 @@ public class InMemoryTaskManager implements TaskManager {
             subTasks.remove(id);
             historyManager.removeHistoryTask(id);
             updateEpicTime(epic);
-
+        } else {
+            throw new ManagerRemoveTaskException("Error, Subtask with id " + id + " cannot be deleted!");
         }
     }
 
@@ -322,10 +337,6 @@ public class InMemoryTaskManager implements TaskManager {
             }
         }
         return false;
-    }
-
-    public Map<Integer, Boolean> getYearlyTimeTable() { // убрать после проверок:
-        return yearlyTimeTable;
     }
 
     private void updateEpicTime(Epic epic) {

@@ -1,6 +1,8 @@
 package test.java.core;
 
 import main.java.core.FileBackedTasksManager;
+import main.java.tasks.Epic;
+import main.java.tasks.Subtask;
 import main.java.tasks.Task;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +22,11 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
                 + "task.csv");
         taskManager = FileBackedTasksManager.loadFromFile(file);
         initTasks();
+        /*taskManager.updateTask(task);
+        taskManager.updateEpic(epic1);
+        taskManager.updateEpic(epic2);
+        taskManager.updateSubtask(subtask1);
+        taskManager.updateSubtask(subtask2);*/
     }
 
     @AfterEach
@@ -28,12 +35,24 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     }
 
     @Test
-    public void loadFromFile() {
-        FileBackedTasksManager tasksManager2 = FileBackedTasksManager.loadFromFile(file);
-        final List<Task> tasks = tasksManager2.getTasks();
-        assertNotNull(tasks, "Return not null list tasks");
-        assertEquals(1, tasks.size(), "Return not null list tasks");
+    public void loadFromFileEpicWithoutSubtask() {
+        taskManager.addNewEpic(epic1);
+        final Epic savedEpic = taskManager.getEpic(epic1.getId());
+        FileBackedTasksManager tasksManagerEpicWithoutSubtask = FileBackedTasksManager.loadFromFile(file);
+        final Epic recoveredEpic = tasksManagerEpicWithoutSubtask.getEpic(epic1.getId());
+        assertEquals(savedEpic, recoveredEpic, "Epics don't match.");
 
+        List<Subtask> subtasksBefore = taskManager.getAllSubTaskForEpic(savedEpic.getId());
+        List<Subtask> subtasksBefore = taskManager.getAllSubTaskForEpic(savedEpic.getId());
+        assertEquals(savedEpic, recoveredEpic, "Epics don't match.");
     }
+/*
+    @Test
+    public void loadFromFile() {
+        FileBackedTasksManager tasksManagerFileBacked = FileBackedTasksManager.loadFromFile(file);
+        final List<Task> tasks = tasksManagerFileBacked.getTasks();
+        assertNotNull(tasks, "Return not null list tasks");
+        assertEquals(0, tasks.size(), "Return not null list tasks");
+    }*/
 
 }

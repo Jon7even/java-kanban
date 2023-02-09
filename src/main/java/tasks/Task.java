@@ -24,6 +24,17 @@ public class Task {
         this.startTime = null;
     }
 
+    public Task(int id, TaskType type, String name, String description, TaskStatus status, long duration,
+                LocalDateTime startTime) {
+        this.id = id;
+        this.type = type;
+        this.name = name;
+        this.description = description;
+        this.status = status;
+        this.duration = duration;
+        this.startTime = startTime;
+    }
+
     public Task(TaskType type, String name, String description, TaskStatus status, long duration,
                 LocalDateTime startTime) {
         this.type = type;

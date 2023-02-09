@@ -1,7 +1,11 @@
 package main.java.core;
 
+import main.java.core.exception.HistoryManagerAddTask;
+import main.java.core.exception.HistoryManagerRemoveTask;
+import main.java.core.exception.ManagerSaveException;
 import main.java.tasks.Task;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
@@ -50,12 +54,17 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void addHistoryTask(Task task) {
-        int taskId = task.getId();
+        try {
+            int taskId = task.getId();
 
-        if (nodeMap.containsKey(taskId)) {
-            removeHistoryTask(taskId);
+            if (nodeMap.containsKey(taskId)) {
+                removeHistoryTask(taskId);
+            }
+            nodeMap.put(taskId, linkLast(task));
+        } catch (NullPointerException exception) {
+            throw new HistoryManagerAddTask("Task cannot be null: ", exception);
         }
-        nodeMap.put(taskId, linkLast(task));
+
     }
 
     private Node linkLast(Task task) {
@@ -75,6 +84,8 @@ public class InMemoryHistoryManager implements HistoryManager {
         if (nodeMap.containsKey(id)) {
             removeNode(nodeMap.get(id));
             nodeMap.remove(id);
+        } else {
+            throw new HistoryManagerRemoveTask("Task with id " + id + " does not exist in history.");
         }
     }
 

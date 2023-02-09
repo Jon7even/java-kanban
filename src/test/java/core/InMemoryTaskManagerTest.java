@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
 
@@ -12,6 +13,11 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
     public void setUp() {
         taskManager =new InMemoryTaskManager();
         initTasks();
+    }
+
+    @Test
+    public void createInMemoryTaskManager() {
+        assertNotNull(taskManager.getTasks(), "Return null list Tasks");
     }
 
 

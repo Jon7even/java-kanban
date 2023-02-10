@@ -20,7 +20,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     protected void initTasks() {
 
         task = new Task(1, TaskType.TASK, "Test Task", "Task test description",
-                TaskStatus.NEW, 15, LocalDateTime.now());
+                TaskStatus.NEW, 15, LocalDateTime.of(2023, 1, 1, 0, 0));
 
         epic1 = new Epic(2, TaskType.EPIC, "Test Epic 1", "Epic 1 test description",
                 TaskStatus.NEW);
@@ -29,10 +29,12 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 TaskStatus.NEW);
 
         subtask1 = new Subtask(4, TaskType.SUBTASK, "Test Subtask 1", "Subtask 1 test description",
-                TaskStatus.NEW, 30, task.getEndTime(), epic1.getId());
+                TaskStatus.NEW, 15, LocalDateTime.of(2023, 1, 1, 0, 30),
+                epic1.getId());
 
         subtask2 = new Subtask(5, TaskType.SUBTASK, "Test Subtask 1", "Subtask 2 test description",
-                TaskStatus.NEW, 15, subtask1.getEndTime(), epic1.getId());
+                TaskStatus.NEW, 15, LocalDateTime.of(2023, 1, 1, 1, 0),
+                epic1.getId());
     }
 
 

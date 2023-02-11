@@ -3,8 +3,8 @@ package test.java.core;
 import main.java.core.HistoryManager;
 import main.java.core.InMemoryHistoryManager;
 import main.java.core.exception.HistoryManagerAddTask;
-import main.java.core.exception.HistoryManagerRemoveTask;
 import main.java.tasks.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +38,17 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void removeTasksInHistory() {
+    public void shouldThrowExceptionAddNullTaskInHistory() {
+        final HistoryManagerAddTask exception = assertThrows(
+                HistoryManagerAddTask.class,
+                () -> {
+                    historyManager.addHistoryTask(null);
+                });
+        assertEquals("Task cannot be null: ", exception.getMessage());
+    }
+
+    @Test
+    public void removeHistoryTask() {
         historyManager.addHistoryTask(task);
         historyManager.addHistoryTask(epic);
         historyManager.addHistoryTask(subtask);
@@ -46,31 +56,33 @@ class InMemoryHistoryManagerTest {
         historyManager.removeHistoryTask(2);
         historyManager.removeHistoryTask(1);
         assertEquals(0, historyManager.getHistory().size(), "Task was not removed in history.");
+        historyManager.removeHistoryTask(4);
     }
 
     @Test
-    public void addHistoryTaskOne() {
+    public void shouldAddOneTaskInHistory() {
         historyManager.addHistoryTask(task);
         assertEquals(1, historyManager.getHistory().size(), "Task was not added in history.");
     }
 
     @Test
-    public void addHistoryTaskDuplicateOne() {
+    public void shouldDontMissOneDuplicateTaskInHistory() {
         historyManager.addHistoryTask(task);
         historyManager.addHistoryTask(task);
         assertEquals(1, historyManager.getHistory().size(), "History Tasks have Duplicate.");
     }
 
     @Test
-    public void addHistoryTaskDuplicateTwice() {
+    public void shouldDontMissTwiceDuplicateTaskInHistory() {
         historyManager.addHistoryTask(task);
         historyManager.addHistoryTask(subtask);
+        historyManager.addHistoryTask(task);
         historyManager.addHistoryTask(task);
         assertEquals(2, historyManager.getHistory().size(), "History Tasks have Duplicate.");
     }
 
     @Test
-    public void removeTaskInHeadHistory() {
+    public void shouldRemoveTaskInHeadHistory() {
         historyManager.addHistoryTask(task);
         historyManager.addHistoryTask(epic);
         historyManager.addHistoryTask(subtask);
@@ -83,7 +95,7 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void removeTaskInMiddleHistory() {
+    public void shouldRemoveTaskInMiddleHistory() {
         historyManager.addHistoryTask(task);
         historyManager.addHistoryTask(epic);
         historyManager.addHistoryTask(subtask);
@@ -96,7 +108,7 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void removeTaskInTailHistory() {
+    public void shouldRemoveTaskInTailHistory() {
         historyManager.addHistoryTask(task);
         historyManager.addHistoryTask(epic);
         historyManager.addHistoryTask(subtask);

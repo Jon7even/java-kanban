@@ -1,15 +1,11 @@
 package test.java.core;
 
 import main.java.core.TaskManager;
-import main.java.core.exception.HistoryManagerAddTask;
-import main.java.core.exception.ManagerAddTaskException;
-import main.java.core.exception.ManagerGetTaskException;
-import main.java.core.exception.ManagerRemoveTaskException;
+import main.java.core.exception.*;
 import main.java.tasks.*;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -375,7 +371,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    public void shouldThrowExceptionAddSubtaskWrongEpicId() {
+    public void shouldThrowExceptionWhenAddSubtaskWrongEpicId() {
         taskManager.addNewEpic(epic1);
         Subtask subtaskWrongEpicId = new Subtask(TaskType.SUBTASK, "Test Subtask",
                 "Subtask test description", TaskStatus.NEW, 15,
@@ -390,24 +386,24 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    public void shouldEpicStatusBeNewSubtaskEmpty() {
+    public void shouldEpicStatusBeNewWhenSubtaskEmpty() {
         int idAddEpic = taskManager.addNewEpic(epic1);
         Epic getEpic = taskManager.getEpic(idAddEpic);
-        assertEquals(TaskStatus.NEW, getEpic.getStatus(), "Epic Status Don't match.");
+        assertEquals(TaskStatus.NEW, getEpic.getStatus(), "Epic Status don't match.");
     }
 
     @Test
-    public void shouldEpicStatusBeNewSubtaskAllHaveStatusNew() {
+    public void shouldEpicStatusBeNewWhenSubtaskAllHaveStatusNew() {
         taskManager.addNewEpic(epic1);
         int idAddEpic = taskManager.addNewEpic(epic2);
         taskManager.addNewSubtask(subtask1);
         taskManager.addNewSubtask(subtask2);
         Epic getEpic = taskManager.getEpic(idAddEpic);
-        assertEquals(TaskStatus.NEW, getEpic.getStatus(), "Epic Status Don't match.");
+        assertEquals(TaskStatus.NEW, getEpic.getStatus(), "Epic Status don't match.");
     }
 
     @Test
-    public void shouldEpicStatusBeDoneSubtaskHaveAllStatusDone() {
+    public void shouldEpicStatusBeDoneWhenSubtaskHaveAllStatusDone() {
         taskManager.addNewEpic(epic1);
         int idAddEpic = taskManager.addNewEpic(epic2);
         int idSubtask1 = taskManager.addNewSubtask(subtask1);
@@ -422,11 +418,11 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.updateSubtask(subtaskEdit2);
 
         Epic getEpic = taskManager.getEpic(idAddEpic);
-        assertEquals(TaskStatus.DONE, getEpic.getStatus(), "Epic Status Don't match.");
+        assertEquals(TaskStatus.DONE, getEpic.getStatus(), "Epic Status don't match.");
     }
 
     @Test
-    public void shouldEpicStatusBeInProgressSubtaskHaveStatusDoneAndNew() {
+    public void shouldEpicStatusBeInProgressWhenSubtaskHaveStatusDoneAndNew() {
         taskManager.addNewEpic(epic1);
         int idAddEpic = taskManager.addNewEpic(epic2);
         int idSubtask = taskManager.addNewSubtask(subtask1);
@@ -437,11 +433,11 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.updateSubtask(subtaskEdit);
 
         Epic getEpic = taskManager.getEpic(idAddEpic);
-        assertEquals(TaskStatus.IN_PROGRESS, getEpic.getStatus(), "Epic Status Don't match.");
+        assertEquals(TaskStatus.IN_PROGRESS, getEpic.getStatus(), "Epic Status don't match.");
     }
 
     @Test
-    public void shouldEpicStatusBeInProgressSubtaskHaveStatusProgress() {
+    public void shouldEpicStatusBeInProgressWhenSubtaskHaveStatusProgress() {
         taskManager.addNewEpic(epic1);
         int idAddEpic = taskManager.addNewEpic(epic2);
         int idSubtask1 = taskManager.addNewSubtask(subtask1);
@@ -456,7 +452,180 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.updateSubtask(subtaskEdit2);
 
         Epic getEpic = taskManager.getEpic(idAddEpic);
-        assertEquals(TaskStatus.IN_PROGRESS, getEpic.getStatus(), "Epic Status Don't match.");
+        assertEquals(TaskStatus.IN_PROGRESS, getEpic.getStatus(), "Epic Status don't match.");
+    }
+
+    @Test
+    public void shouldBeNullStartTimeTask() {
+        Task taskNew = new Task(TaskType.TASK, "Test Task", "Task test description",
+                TaskStatus.NEW, 0, null);
+        int idTask = taskManager.addNewTask(taskNew);
+        assertNull(taskManager.getTask(idTask).getStartTime(), "Time don't null");
+    }
+
+    @Test
+    public void shouldBeNullStartTimeSubtask() {
+        taskManager.addNewEpic(epic2);
+        int idEpic = taskManager.addNewEpic(epic1);
+        Subtask SubtaskNew = new Subtask(TaskType.SUBTASK, "Test Subtask", "Subtask test description",
+                TaskStatus.NEW, 0, null, idEpic);
+        int idSubtask = taskManager.addNewSubtask(SubtaskNew);
+        assertNull(taskManager.getSubtask(idSubtask).getStartTime(), "Time don't null");
+    }
+
+    @Test
+    public void shouldBeNullStartTimeEpic() {
+        int idEpic = taskManager.addNewEpic(epic1);
+        assertNull(taskManager.getEpic(idEpic).getStartTime(), "Time don't null");
+    }
+
+    @Test
+    public void shouldBeGetEndTimeTask() {
+        LocalDateTime firstTime = LocalDateTime.of(2023, 1, 1, 0, 0);
+
+        Task taskNew = new Task(TaskType.TASK, "Test Task", "Task test description",
+                TaskStatus.NEW, 15, firstTime);
+        int idTask = taskManager.addNewTask(taskNew);
+        Task taskWithTime = taskManager.getTask(idTask);
+
+        assertNotNull(taskWithTime.getEndTime(), "EndTime null.");
+        assertEquals(firstTime.plusMinutes(15), taskWithTime.getEndTime(), "Time don't match.");
+    }
+
+    @Test
+    public void shouldBeGetEndTimeSubtask() {
+        taskManager.addNewEpic(epic2);
+        int idEpic = taskManager.addNewEpic(epic1);
+        LocalDateTime firstTime = LocalDateTime.of(2023, 1, 1, 0, 0);
+
+        Subtask SubtaskNew = new Subtask(TaskType.SUBTASK, "Test Subtask", "Subtask test description",
+                TaskStatus.NEW, 15, firstTime, idEpic);
+
+        int idSubtask = taskManager.addNewSubtask(SubtaskNew);
+        Subtask subtaskWithTime = taskManager.getSubtask(idSubtask);
+
+        assertNotNull(subtaskWithTime.getEndTime(), "EndTime null.");
+        assertEquals(firstTime.plusMinutes(15), subtaskWithTime.getEndTime(), "Time don't match.");
+    }
+
+    @Test
+    public void shouldBeGetStartTimeAndEndTimeEpicWhenOneSubtask() {
+        taskManager.addNewEpic(epic2);
+        int idEpic = taskManager.addNewEpic(epic1);
+        LocalDateTime firstTime = LocalDateTime.of(2023, 2, 1, 0, 0);
+
+        Subtask SubtaskNew = new Subtask(TaskType.SUBTASK, "Test Subtask", "Subtask test description",
+                TaskStatus.NEW, 15, firstTime, idEpic);
+
+        int idSubtask = taskManager.addNewSubtask(SubtaskNew);
+        Subtask subtaskWithTime = taskManager.getSubtask(idSubtask);
+        Epic epicWithTime = taskManager.getEpic(idEpic);
+
+        assertNotNull(epicWithTime.getEndTime(), "EndTime null.");
+        assertNotNull(epicWithTime.getStartTime(), "StartTime null.");
+        assertEquals(firstTime.plusMinutes(15), epicWithTime.getEndTime(), "Time don't match.");
+        assertEquals(subtaskWithTime.getStartTime(), epicWithTime.getStartTime(), "Time don't match.");
+    }
+
+    @Test
+    public void shouldBeGetStartTimeAndEndTimeEpicWhenTwoSubtask() {
+        taskManager.addNewEpic(epic2);
+        int idEpic = taskManager.addNewEpic(epic1);
+        LocalDateTime firstTime = LocalDateTime.of(2023, 2, 1, 0, 0);
+
+        Subtask SubtaskNew1 = new Subtask(TaskType.SUBTASK, "Test Subtask", "Subtask test description",
+                TaskStatus.NEW, 14, firstTime, idEpic);
+        int idSubtask1 = taskManager.addNewSubtask(SubtaskNew1);
+        Subtask subtaskWithTime1 = taskManager.getSubtask(idSubtask1);
+
+        Subtask SubtaskNew2 = new Subtask(TaskType.SUBTASK, "Test Subtask", "Subtask test description",
+                TaskStatus.NEW, 15, firstTime.plusMinutes(15), idEpic);
+        int idSubtask2 = taskManager.addNewSubtask(SubtaskNew2);
+        Subtask subtaskWithTime2 = taskManager.getSubtask(idSubtask2);
+
+        Epic epicWithTime = taskManager.getEpic(idEpic);
+
+        assertNotNull(epicWithTime.getEndTime(), "EndTime null.");
+        assertNotNull(epicWithTime.getStartTime(), "StartTime null.");
+        assertEquals(subtaskWithTime2.getEndTime(), epicWithTime.getEndTime(), "Time don't match.");
+        assertEquals(subtaskWithTime1.getStartTime(), epicWithTime.getStartTime(), "Time don't match.");
+    }
+
+    @Test
+    public void shouldBeGetStartTimeAndEndTimeEpicWhenTwoSubtaskUpdateTimeBackward() {
+        taskManager.addNewEpic(epic2);
+        int idEpic = taskManager.addNewEpic(epic1);
+        LocalDateTime firstTime = LocalDateTime.of(2023, 2, 1, 0, 0);
+
+        Subtask SubtaskNew1 = new Subtask(TaskType.SUBTASK, "Test Subtask", "Subtask test description",
+                TaskStatus.NEW, 14, firstTime, idEpic);
+        int idSubtask1 = taskManager.addNewSubtask(SubtaskNew1);
+        taskManager.getSubtask(idSubtask1);
+
+        Subtask SubtaskNew2 = new Subtask(TaskType.SUBTASK, "Test Subtask", "Subtask test description",
+                TaskStatus.NEW, 15, firstTime.plusMinutes(15), idEpic);
+        int idSubtask2 = taskManager.addNewSubtask(SubtaskNew2);
+
+        Subtask subtaskUpdateBackwardTime = taskManager.getSubtask(idSubtask1);
+        subtaskUpdateBackwardTime.setStartTime(firstTime.minusMinutes(15));
+        taskManager.updateSubtask(subtaskUpdateBackwardTime);
+
+        Epic epicWithTime = taskManager.getEpic(idEpic);
+        Subtask subtaskAfterUpdate1 = taskManager.getSubtask(idSubtask1);
+        Subtask subtaskWithTime2 = taskManager.getSubtask(idSubtask2);
+
+        assertNotNull(epicWithTime.getEndTime(), "EndTime null.");
+        assertNotNull(epicWithTime.getStartTime(), "StartTime null.");
+        assertEquals(subtaskWithTime2.getEndTime(), epicWithTime.getEndTime(), "Time don't match.");
+        assertEquals(subtaskAfterUpdate1.getStartTime(), epicWithTime.getStartTime(), "Time don't match.");
+    }
+
+    @Test
+    public void shouldBeGetStartTimeAndEndTimeEpicWhenTwoSubtaskUpdateTimeForward() {
+        taskManager.addNewEpic(epic2);
+        int idEpic = taskManager.addNewEpic(epic1);
+        LocalDateTime firstTime = LocalDateTime.of(2023, 2, 1, 0, 0);
+
+        Subtask SubtaskNew1 = new Subtask(TaskType.SUBTASK, "Test Subtask", "Subtask test description",
+                TaskStatus.NEW, 14, firstTime, idEpic);
+        int idSubtask1 = taskManager.addNewSubtask(SubtaskNew1);
+        taskManager.getSubtask(idSubtask1);
+
+        Subtask SubtaskNew2 = new Subtask(TaskType.SUBTASK, "Test Subtask", "Subtask test description",
+                TaskStatus.NEW, 15, firstTime.plusMinutes(15), idEpic);
+        int idSubtask2 = taskManager.addNewSubtask(SubtaskNew2);
+
+        Subtask subtaskUpdateForwardTime = taskManager.getSubtask(idSubtask2);
+        subtaskUpdateForwardTime.setStartTime(firstTime.plusMinutes(45));
+        taskManager.updateSubtask(subtaskUpdateForwardTime);
+
+        Epic epicWithTime = taskManager.getEpic(idEpic);
+        Subtask subtaskWithTime1 = taskManager.getSubtask(idSubtask1);
+        Subtask subtaskAfterUpdate2 = taskManager.getSubtask(idSubtask2);
+
+        assertNotNull(epicWithTime.getEndTime(), "EndTime null.");
+        assertNotNull(epicWithTime.getStartTime(), "StartTime null.");
+        assertEquals(subtaskAfterUpdate2.getEndTime(), epicWithTime.getEndTime(), "Time don't match.");
+        assertEquals(subtaskWithTime1.getStartTime(), epicWithTime.getStartTime(), "Time don't match.");
+    }
+
+    @Test
+    public void shouldThrowExceptionTimeWhenAddSubtaskForBusyTime() {
+        taskManager.addNewEpic(epic2);
+        int idEpic = taskManager.addNewEpic(epic1);
+        LocalDateTime firstTime = LocalDateTime.of(2023, 1, 1, 0, 5);
+
+        Subtask SubtaskNew = new Subtask(TaskType.SUBTASK, "Test Subtask", "Subtask test description",
+                TaskStatus.NEW, 15, firstTime, idEpic);
+        taskManager.addNewSubtask(SubtaskNew);
+
+        final ManagerTimeIntersectionsException exceptionSubtaskBusyTime = assertThrows(
+                ManagerTimeIntersectionsException.class,
+                () -> {
+                    taskManager.addNewTask(task);
+                });
+        assertEquals("Task overlap in time. Task id - 1\n    "
+                + "Conflict in period: 00:00 01.01.23 - 00:15 01.01.23", exceptionSubtaskBusyTime.getMessage());
     }
 
 }

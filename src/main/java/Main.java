@@ -66,6 +66,5 @@ public class Main {
 
         System.out.println(tasksManagerFBTest.getEpic(epicId1).getEndTime());
         System.out.println(tasksManagerFBTest.getEpic(epicId2).getEndTime());
-
     }
 }

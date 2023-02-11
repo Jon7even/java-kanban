@@ -2,10 +2,8 @@ package main.java.core;
 
 import main.java.core.exception.HistoryManagerAddTask;
 import main.java.core.exception.HistoryManagerRemoveTask;
-import main.java.core.exception.ManagerSaveException;
 import main.java.tasks.Task;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;

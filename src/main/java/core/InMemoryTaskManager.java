@@ -36,6 +36,14 @@ public class InMemoryTaskManager implements TaskManager {
             LocalDateTime startTime = task.getStartTime();
             LocalDateTime endTime = task.getEndTime();
 
+            if (startTime == null) {
+                prioritizedTasks.add(task);
+                int id = ++idGenerate;
+                task.setId(id);
+                tasks.put(id, task);
+                return id;
+            }
+
             if (!isConflictTimeIntersection(startTime, endTime)) {
                 prioritizedTasks.add(task);
                 setIntervalsYearlyTimeTable(listsInterval(startTime, endTime), true);
@@ -71,6 +79,22 @@ public class InMemoryTaskManager implements TaskManager {
         try {
             LocalDateTime startTime = subtask.getStartTime();
             LocalDateTime endTime = subtask.getEndTime();
+
+            if (startTime == null) {
+                prioritizedTasks.add(subtask);
+                Epic epic = epicTasks.get(subtask.getRelationEpicId());
+                if (epic == null) {
+                    throw new ManagerGetTaskException("Error, Epic cannot be received!");
+                } else {
+                    int id = ++idGenerate;
+                    subtask.setId(id);
+                    subTasks.put(id, subtask);
+                    epic.addSubtaskId(id);
+                    updateEpicTime(epic);
+                    updateEpicStatus(epic);
+                    return id;
+                }
+            }
 
             if (!isConflictTimeIntersection(startTime, endTime)) {
                 prioritizedTasks.add(subtask);
@@ -359,20 +383,21 @@ public class InMemoryTaskManager implements TaskManager {
                 LocalDateTime subtaskStartTime = subtask.getStartTime();
                 LocalDateTime subtaskEndTime = subtask.getEndTime();
 
-                if (epic.getEndTime() == null) {
-                    epic.setStartTime(subtaskStartTime);
-                    epic.setEndTime(subtaskEndTime);
-                    epic.setDuration(Duration.between(epic.getStartTime(), epic.getEndTime()).toMinutes());
-                } else {
-                    if (epic.getStartTime().isAfter(subtaskStartTime)) {
+                if (subtaskStartTime != null) {
+                    if (epic.getEndTime() == null) {
                         epic.setStartTime(subtaskStartTime);
-                    }
-                    if (epic.getEndTime().isBefore(subtaskEndTime)) {
                         epic.setEndTime(subtaskEndTime);
+                        epic.setDuration(Duration.between(epic.getStartTime(), epic.getEndTime()).toMinutes());
+                    } else {
+                        if (epic.getStartTime().isAfter(subtaskStartTime)) {
+                            epic.setStartTime(subtaskStartTime);
+                        }
+                        if (epic.getEndTime().isBefore(subtaskEndTime)) {
+                            epic.setEndTime(subtaskEndTime);
+                        }
+                        epic.setDuration(Duration.between(epic.getStartTime(), epic.getEndTime()).toMinutes());
                     }
-                    epic.setDuration(Duration.between(epic.getStartTime(), epic.getEndTime()).toMinutes());
                 }
-
             }
 
         }
@@ -490,4 +515,5 @@ public class InMemoryTaskManager implements TaskManager {
             epic.setStatus(TaskStatus.IN_PROGRESS);
         }
     }
+
 }

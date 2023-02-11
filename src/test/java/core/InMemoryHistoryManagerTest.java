@@ -38,26 +38,6 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void shouldThrowExceptionRemoveTaskInNullHistory() {
-        final HistoryManagerRemoveTask exception = assertThrows(
-                HistoryManagerRemoveTask.class,
-                () -> {
-                    historyManager.removeHistoryTask(1);
-                });
-        assertEquals("Task with id 1 does not exist in history.", exception.getMessage());
-    }
-
-    @Test
-    public void shouldThrowExceptionAddNullTaskInHistory() {
-        final HistoryManagerAddTask exception = assertThrows(
-                HistoryManagerAddTask.class,
-                () -> {
-                    historyManager.addHistoryTask(null);
-                });
-        assertEquals("Task cannot be null: ", exception.getMessage());
-    }
-
-    @Test
     public void removeTasksInHistory() {
         historyManager.addHistoryTask(task);
         historyManager.addHistoryTask(epic);

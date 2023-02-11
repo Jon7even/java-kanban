@@ -84,8 +84,6 @@ public class InMemoryHistoryManager implements HistoryManager {
         if (nodeMap.containsKey(id)) {
             removeNode(nodeMap.get(id));
             nodeMap.remove(id);
-        } else {
-            throw new HistoryManagerRemoveTask("Task with id " + id + " does not exist in history.");
         }
     }
 

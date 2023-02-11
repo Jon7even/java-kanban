@@ -44,7 +44,7 @@ public class InMemoryTaskManager implements TaskManager {
                 tasks.put(id, task);
                 return id;
             } else {
-                throw new ManagerTimeIntersectionsException("Task overlap in time. " + "subtask id - "
+                throw new ManagerTimeIntersectionsException("Task overlap in time. " + "Task id - "
                         + task.getId() + "\n    Conflict in period: "
                         + startTime.format(DATE_TIME_FORMATTER) + " - "
                         + endTime.format(DATE_TIME_FORMATTER));
@@ -88,7 +88,7 @@ public class InMemoryTaskManager implements TaskManager {
                     return id;
                 }
             } else {
-                throw new ManagerTimeIntersectionsException("SubTask overlap in time. " + "subtask id - "
+                throw new ManagerTimeIntersectionsException("SubTask overlap in time. " + "Subtask id - "
                         + subtask.getId() + "\n    Conflict in period: "
                         + startTime.format(DATE_TIME_FORMATTER) + " - "
                         + endTime.format(DATE_TIME_FORMATTER));
@@ -144,6 +144,7 @@ public class InMemoryTaskManager implements TaskManager {
 
             prioritizedTasks.remove(tasks.get(idTask));
             prioritizedTasks.add(task);
+
             if (oldTimeInterval.equals(listsInterval(startTime, endTime))) {
                 tasks.put(idTask, task);
             } else {
@@ -152,7 +153,7 @@ public class InMemoryTaskManager implements TaskManager {
                     setIntervalsYearlyTimeTable(listsInterval(startTime, endTime), true);
                     tasks.put(idTask, task);
                 } else {
-                    throw new ManagerTimeIntersectionsException("Task overlap in time. " + "subtask id - "
+                    throw new ManagerTimeIntersectionsException("Task overlap in time. " + "Task id - "
                             + task.getId() + "\n    Conflict in period: "
                             + startTime.format(DATE_TIME_FORMATTER) + " - "
                             + endTime.format(DATE_TIME_FORMATTER));
@@ -186,6 +187,7 @@ public class InMemoryTaskManager implements TaskManager {
 
             prioritizedTasks.remove(subTasks.get(idSubtask));
             prioritizedTasks.add(subtask);
+
             if (oldTimeInterval.equals(listsInterval(startTime, endTime))) {
                 subTasks.put(idSubtask, subtask);
                 Epic epic = epicTasks.get(subtask.getRelationEpicId());
@@ -200,7 +202,7 @@ public class InMemoryTaskManager implements TaskManager {
                     updateEpicStatus(epic);
                     updateEpicTime(epic);
                 } else {
-                    throw new ManagerTimeIntersectionsException("SubTask overlap in time. " + "subtask id - "
+                    throw new ManagerTimeIntersectionsException("SubTask overlap in time. " + "Subtask id - "
                             + subtask.getId() + "\n    Conflict in period: "
                             + startTime.format(DATE_TIME_FORMATTER) + " - "
                             + endTime.format(DATE_TIME_FORMATTER));
@@ -214,6 +216,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteAllTasks() {
         for (Integer id : tasks.keySet()) {
+
             historyManager.removeHistoryTask(id);
             prioritizedTasks.remove(tasks.get(id));
             setIntervalsYearlyTimeTable(listsInterval(tasks.get(id).getStartTime(),
@@ -401,7 +404,7 @@ public class InMemoryTaskManager implements TaskManager {
             if (!isConflictTimeIntersection(startTime, endTime)) {
                 setIntervalsYearlyTimeTable(listsInterval(startTime, endTime), true);
             } else {
-                throw new ManagerTimeIntersectionsException("Task overlap in time. " + "subtask id - "
+                throw new ManagerTimeIntersectionsException("Task overlap in time. " + "Task id - "
                         + task.getId() + "\n    Conflict in period: "
                         + startTime.format(DATE_TIME_FORMATTER) + " - "
                         + endTime.format(DATE_TIME_FORMATTER));
@@ -415,7 +418,7 @@ public class InMemoryTaskManager implements TaskManager {
             if (!isConflictTimeIntersection(startTime, endTime)) {
                 setIntervalsYearlyTimeTable(listsInterval(startTime, endTime), true);
             } else {
-                throw new ManagerTimeIntersectionsException("Subtask overlap in time. " + "subtask id - "
+                throw new ManagerTimeIntersectionsException("Subtask overlap in time. " + "Subtask id - "
                         + subtask.getId() + "\n    Conflict in period: "
                         + startTime.format(DATE_TIME_FORMATTER) + " - "
                         + endTime.format(DATE_TIME_FORMATTER));

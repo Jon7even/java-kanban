@@ -7,12 +7,9 @@ import main.java.core.exception.HistoryManagerRemoveTask;
 import main.java.tasks.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,7 +21,7 @@ class InMemoryHistoryManagerTest {
     protected Subtask subtask;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         historyManager = new InMemoryHistoryManager();
 
         task = new Task(1, TaskType.TASK, "Test Task", "Task test description",
@@ -36,12 +33,12 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    void getHistory() {
+    public void getHistory() {
         assertNotNull(historyManager.getHistory(), "History null.");
     }
 
     @Test
-    void shouldThrowExceptionRemoveTaskInNullHistory() {
+    public void shouldThrowExceptionRemoveTaskInNullHistory() {
         final HistoryManagerRemoveTask exception = assertThrows(
                 HistoryManagerRemoveTask.class,
                 () -> {
@@ -51,7 +48,7 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    void shouldThrowExceptionAddNullTaskInHistory() {
+    public void shouldThrowExceptionAddNullTaskInHistory() {
         final HistoryManagerAddTask exception = assertThrows(
                 HistoryManagerAddTask.class,
                 () -> {
@@ -61,7 +58,7 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    void removeTasksInHistory() {
+    public void removeTasksInHistory() {
         historyManager.addHistoryTask(task);
         historyManager.addHistoryTask(epic);
         historyManager.addHistoryTask(subtask);
@@ -93,7 +90,7 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    void removeTaskInHeadHistory() {
+    public void removeTaskInHeadHistory() {
         historyManager.addHistoryTask(task);
         historyManager.addHistoryTask(epic);
         historyManager.addHistoryTask(subtask);
@@ -106,7 +103,7 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    void removeTaskInMiddleHistory() {
+    public void removeTaskInMiddleHistory() {
         historyManager.addHistoryTask(task);
         historyManager.addHistoryTask(epic);
         historyManager.addHistoryTask(subtask);
@@ -119,7 +116,7 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    void removeTaskInTailHistory() {
+    public void removeTaskInTailHistory() {
         historyManager.addHistoryTask(task);
         historyManager.addHistoryTask(epic);
         historyManager.addHistoryTask(subtask);

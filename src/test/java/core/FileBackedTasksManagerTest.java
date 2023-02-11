@@ -1,7 +1,6 @@
 package test.java.core;
 
 import main.java.core.FileBackedTasksManager;
-import main.java.core.exception.HistoryManagerRemoveTask;
 import main.java.core.exception.ManagerGetTaskException;
 import main.java.tasks.*;
 import org.junit.jupiter.api.AfterEach;
@@ -35,8 +34,8 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         FileBackedTasksManager tasksManagerEmptyListTask1 = FileBackedTasksManager.loadFromFile(file);
         final List<Task> tasksEmpty1 = tasksManagerEmptyListTask1.getTasks();
 
-        assertNotNull(tasksEmpty1, "Return not null list tasks.");
-        assertEquals(0, tasksEmpty1.size(), "Return not null list tasks.");
+        assertNotNull(tasksEmpty1, "Return null list tasks.");
+        assertEquals(0, tasksEmpty1.size(), "Return not empty list tasks.");
 
         tasksManagerEmptyListTask1.addNewTask(task);
         tasksManagerEmptyListTask1.addNewEpic(epic1);
@@ -47,9 +46,9 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         final List<Subtask> subtasks = tasksManagerEmptyListTask1.getSubtasks();
         final List<Epic> epics = tasksManagerEmptyListTask1.getEpics();
 
-        assertNotNull(tasks, "Tasks don't added.");
-        assertNotNull(subtasks, "Subtasks don't added.");
-        assertNotNull(epics, "Epics don't added.");
+        assertNotNull(tasks, "Tasks null");
+        assertNotNull(subtasks, "Subtasks null");
+        assertNotNull(epics, "Epics null");
 
         tasksManagerEmptyListTask1.getTask(1);
         tasksManagerEmptyListTask1.getEpic(2);
@@ -68,9 +67,11 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         final List<Epic> epicEmpty2 = tasksManagerEmptyListTask2.getEpics();
 
         assertEquals(0, tasksManagerEmptyListTask2.getHistory().size(), "History don't match.");
-        assertNotNull(tasksEmpty2, "Return not null list tasks.");
-        assertNotNull(subtaskEmpty2, "Return not null list subtasks.");
-        assertNotNull(epicEmpty2, "Return not null list epics.");
+
+        assertNotNull(tasksEmpty2, "Return null list tasks.");
+        assertNotNull(subtaskEmpty2, "Return null list subtasks.");
+        assertNotNull(epicEmpty2, "Return null list epics.");
+
         assertEquals(0, tasksEmpty2.size(), "Return not null list tasks.");
         assertEquals(0, subtaskEmpty2.size(), "Return not null list tasks.");
         assertEquals(0, epicEmpty2.size(), "Return not null list tasks.");
@@ -134,12 +135,12 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         LocalDateTime recoveredSubtask2 = tasksManagerTimeTest.getSubtask(5).getEndTime();
 
         assertNull(oldEpicNull2, "Empty Epic have don't Time null: ");
+
         assertEquals(oldTask, recoveredTask, "Time don't match in Task: ");
         assertEquals(oldSubtask1, recoveredSubtask1, "Time don't match in Subtask: ");
         assertEquals(oldSubtask2, recoveredSubtask2, "Time don't match in Subtask: ");
         assertEquals(oldEpic1, recoveredEpic1, "Time don't match in Epic: ");
         assertEquals(oldEpicNull2, recoveredEpicNull2, "Time don't match in Epic: ");
-
     }
 
 }

@@ -97,17 +97,14 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     public void addNewSubtask() {
         assertNotNull(taskManager.getSubtasks(), "Return null list Subtasks");
 
-        Epic epicNew = new Epic(TaskType.EPIC, "Test Epic", "Epic test description", TaskStatus.NEW);
-        final int epicId = taskManager.addNewEpic(epicNew);
+        taskManager.addNewEpic(epic2);
+        taskManager.addNewEpic(epic1);
+        Subtask subtaskNew = subtask1;
+        int idSubtask = taskManager.addNewSubtask(subtaskNew);
 
-        Subtask subtaskNew = new Subtask(5, TaskType.SUBTASK, "Test Subtask",
-                "Subtask test description", TaskStatus.NEW, 15,
-                LocalDateTime.of(2023, 1, 1, 1, 0), epicId);
-        final int subtaskId = taskManager.addNewSubtask(subtaskNew);
+        final Subtask savedSubtask = taskManager.getSubtask(idSubtask);
 
-        final Subtask savedSubtask = taskManager.getSubtask(subtaskId);
-
-        assertNotNull(savedSubtask, "Subtask not found.");
+        assertNotNull(savedSubtask, "Subtask null.");
         assertEquals(subtaskNew, savedSubtask, "Subtask don't match.");
 
         final List<Subtask> subtask = taskManager.getSubtasks();
@@ -375,6 +372,91 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                     taskManager.getSubtask(2);
                 });
         assertEquals("Error, Subtask with id 2 cannot be received!", exceptionAddSubtask.getMessage());
+    }
+
+    @Test
+    public void shouldThrowExceptionAddSubtaskWrongEpicId() {
+        taskManager.addNewEpic(epic1);
+        Subtask subtaskWrongEpicId = new Subtask(TaskType.SUBTASK, "Test Subtask",
+                "Subtask test description", TaskStatus.NEW, 15,
+                LocalDateTime.of(2023, 1, 1, 2, 0), 2);
+
+        final ManagerGetTaskException exceptionEpicDontExist = assertThrows(
+                ManagerGetTaskException.class,
+                () -> {
+                    taskManager.addNewSubtask(subtaskWrongEpicId);
+                });
+        assertEquals("Error, Epic cannot be received!", exceptionEpicDontExist.getMessage());
+    }
+
+    @Test
+    public void shouldEpicStatusBeNewSubtaskEmpty() {
+        int idAddEpic = taskManager.addNewEpic(epic1);
+        Epic getEpic = taskManager.getEpic(idAddEpic);
+        assertEquals(TaskStatus.NEW, getEpic.getStatus(), "Epic Status Don't match.");
+    }
+
+    @Test
+    public void shouldEpicStatusBeNewSubtaskAllHaveStatusNew() {
+        taskManager.addNewEpic(epic1);
+        int idAddEpic = taskManager.addNewEpic(epic2);
+        taskManager.addNewSubtask(subtask1);
+        taskManager.addNewSubtask(subtask2);
+        Epic getEpic = taskManager.getEpic(idAddEpic);
+        assertEquals(TaskStatus.NEW, getEpic.getStatus(), "Epic Status Don't match.");
+    }
+
+    @Test
+    public void shouldEpicStatusBeDoneSubtaskHaveAllStatusDone() {
+        taskManager.addNewEpic(epic1);
+        int idAddEpic = taskManager.addNewEpic(epic2);
+        int idSubtask1 = taskManager.addNewSubtask(subtask1);
+        int idSubtask2 = taskManager.addNewSubtask(subtask2);
+
+        Subtask subtaskEdit1 = taskManager.getSubtask(idSubtask1);
+        subtaskEdit1.setStatus(TaskStatus.DONE);
+        taskManager.updateSubtask(subtaskEdit1);
+
+        Subtask subtaskEdit2 = taskManager.getSubtask(idSubtask2);
+        subtaskEdit2.setStatus(TaskStatus.DONE);
+        taskManager.updateSubtask(subtaskEdit2);
+
+        Epic getEpic = taskManager.getEpic(idAddEpic);
+        assertEquals(TaskStatus.DONE, getEpic.getStatus(), "Epic Status Don't match.");
+    }
+
+    @Test
+    public void shouldEpicStatusBeInProgressSubtaskHaveStatusDoneAndNew() {
+        taskManager.addNewEpic(epic1);
+        int idAddEpic = taskManager.addNewEpic(epic2);
+        int idSubtask = taskManager.addNewSubtask(subtask1);
+        taskManager.addNewSubtask(subtask2);
+
+        Subtask subtaskEdit = taskManager.getSubtask(idSubtask);
+        subtaskEdit.setStatus(TaskStatus.DONE);
+        taskManager.updateSubtask(subtaskEdit);
+
+        Epic getEpic = taskManager.getEpic(idAddEpic);
+        assertEquals(TaskStatus.IN_PROGRESS, getEpic.getStatus(), "Epic Status Don't match.");
+    }
+
+    @Test
+    public void shouldEpicStatusBeInProgressSubtaskHaveStatusProgress() {
+        taskManager.addNewEpic(epic1);
+        int idAddEpic = taskManager.addNewEpic(epic2);
+        int idSubtask1 = taskManager.addNewSubtask(subtask1);
+        int idSubtask2 = taskManager.addNewSubtask(subtask2);
+
+        Subtask subtaskEdit1 = taskManager.getSubtask(idSubtask1);
+        subtaskEdit1.setStatus(TaskStatus.IN_PROGRESS);
+        taskManager.updateSubtask(subtaskEdit1);
+
+        Subtask subtaskEdit2 = taskManager.getSubtask(idSubtask2);
+        subtaskEdit2.setStatus(TaskStatus.IN_PROGRESS);
+        taskManager.updateSubtask(subtaskEdit2);
+
+        Epic getEpic = taskManager.getEpic(idAddEpic);
+        assertEquals(TaskStatus.IN_PROGRESS, getEpic.getStatus(), "Epic Status Don't match.");
     }
 
 }

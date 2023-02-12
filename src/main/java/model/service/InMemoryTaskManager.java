@@ -1,7 +1,10 @@
-package historyManagerTest;
+package service;
 
-import historyManagerTest.exception.*;
 import model.*;
+import service.exception.ManagerAddTaskException;
+import service.exception.ManagerGetTaskException;
+import service.exception.ManagerRemoveTaskException;
+import service.exception.ManagerTimeIntersectionsException;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

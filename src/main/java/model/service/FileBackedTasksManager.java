@@ -1,7 +1,8 @@
-package historyManagerTest;
+package service;
 
-import historyManagerTest.exception.*;
 import model.*;
+import service.exception.ManagerLoadFromFileException;
+import service.exception.ManagerSaveException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

@@ -1,4 +1,4 @@
-package historyManagerTest.exception;
+package service.exception;
 
 public class ManagerAddTaskException extends RuntimeException {
     public ManagerAddTaskException(final String message) {

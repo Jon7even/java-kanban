@@ -1,4 +1,4 @@
-package historyManagerTest;
+package service;
 
 public class Managers {
     private Managers() {

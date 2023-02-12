@@ -1,7 +1,7 @@
-package historyManagerTest;
+package service;
 
 import model.Task;
-import historyManagerTest.exception.HistoryManagerAddTask;
+import service.exception.HistoryManagerAddTask;
 
 import java.util.ArrayList;
 import java.util.List;

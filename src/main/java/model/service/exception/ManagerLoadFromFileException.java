@@ -1,4 +1,4 @@
-package historyManagerTest.exception;
+package service.exception;
 
 public class ManagerLoadFromFileException extends RuntimeException {
     public ManagerLoadFromFileException(final String message, final Throwable throwable) {

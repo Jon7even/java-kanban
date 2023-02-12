@@ -1,4 +1,4 @@
-package main.java.core.exception;
+package historyManagerTest.exception;
 
 public class ManagerLoadFromFileException extends RuntimeException {
     public ManagerLoadFromFileException(final String message, final Throwable throwable) {

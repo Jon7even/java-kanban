@@ -1,17 +1,14 @@
-package main.java.core;
+package historyManagerTest;
 
-import main.java.core.exception.ManagerAddTaskException;
-import main.java.core.exception.ManagerGetTaskException;
-import main.java.core.exception.ManagerRemoveTaskException;
-import main.java.core.exception.ManagerTimeIntersectionsException;
-import main.java.tasks.*;
+import historyManagerTest.exception.*;
+import model.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 
-import static main.java.tasks.Task.DATE_TIME_FORMATTER;
+import static model.Task.DATE_TIME_FORMATTER;
 
 public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, Task> tasks = new HashMap<>();

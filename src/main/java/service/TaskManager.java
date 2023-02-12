@@ -1,8 +1,8 @@
-package main.java.core;
+package historyManagerTest;
 
-import main.java.tasks.Epic;
-import main.java.tasks.Subtask;
-import main.java.tasks.Task;
+import model.Epic;
+import model.Subtask;
+import model.Task;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package main.java.core.exception;
+package historyManagerTest.exception;
 
 public class ManagerTimeIntersectionsException extends RuntimeException {
     public ManagerTimeIntersectionsException(final String message) {

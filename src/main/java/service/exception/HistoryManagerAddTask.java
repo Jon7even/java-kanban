@@ -1,4 +1,4 @@
-package main.java.core.exception;
+package historyManagerTest.exception;
 
 public class HistoryManagerAddTask extends RuntimeException {
     public HistoryManagerAddTask(final String message, final Throwable throwable) {

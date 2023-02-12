@@ -1,8 +1,7 @@
-package test.java.core;
+package historyManagerTest;
 
-import main.java.core.TaskManager;
-import main.java.core.exception.*;
-import main.java.tasks.*;
+import historyManagerTest.exception.*;
+import model.*;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;

@@ -1,4 +1,4 @@
-package main.java.core.exception;
+package historyManagerTest.exception;
 
 public class ManagerSaveException extends RuntimeException {
     public ManagerSaveException(final String message, final Throwable throwable) {

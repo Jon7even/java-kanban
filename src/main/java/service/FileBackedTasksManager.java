@@ -1,7 +1,7 @@
-package main.java.core;
+package historyManagerTest;
 
-import main.java.core.exception.*;
-import main.java.tasks.*;
+import historyManagerTest.exception.*;
+import model.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static main.java.tasks.Task.DATE_TIME_FORMATTER;
+import static model.Task.DATE_TIME_FORMATTER;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
     private final File file;

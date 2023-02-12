@@ -1,8 +1,8 @@
-package test.java.core;
+package historyManagerTest;
 
-import main.java.core.FileBackedTasksManager;
-import main.java.core.exception.ManagerGetTaskException;
-import main.java.tasks.*;
+import historyManagerTest.exception.ManagerGetTaskException;
+import model.*;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

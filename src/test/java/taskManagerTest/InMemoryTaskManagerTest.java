@@ -1,6 +1,5 @@
-package test.java.core;
+package historyManagerTest;
 
-import main.java.core.InMemoryTaskManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

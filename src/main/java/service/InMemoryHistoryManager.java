@@ -1,8 +1,7 @@
-package main.java.core;
+package historyManagerTest;
 
-import main.java.core.exception.HistoryManagerAddTask;
-import main.java.core.exception.HistoryManagerRemoveTask;
-import main.java.tasks.Task;
+import model.Task;
+import historyManagerTest.exception.HistoryManagerAddTask;
 
 import java.util.ArrayList;
 import java.util.List;

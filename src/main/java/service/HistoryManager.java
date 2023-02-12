@@ -1,8 +1,8 @@
-package main.java.core;
+package historyManagerTest;
 
 import java.util.List;
 
-import main.java.tasks.Task;
+import model.Task;
 
 public interface HistoryManager {
     List<Task> getHistory();

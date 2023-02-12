@@ -1,13 +1,19 @@
-package historyManagerTest;
+package taskManagerTest;
 
-import historyManagerTest.exception.ManagerGetTaskException;
+import service.FileBackedTasksManager;
 import model.*;
+import service.exception.ManagerSaveException;
+import service.exception.ManagerGetTaskException;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -141,6 +147,20 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         assertEquals(oldSubtask2, recoveredSubtask2, "Time don't match in Subtask: ");
         assertEquals(oldEpic1, recoveredEpic1, "Time don't match in Epic: ");
         assertEquals(oldEpicNull2, recoveredEpicNull2, "Time don't match in Epic: ");
+    }
+
+    @Test
+    public void shouldThrowExceptionLoadFromBrokenFile() {
+        file = new File("src" + File.separator + "test" + File.separator + "resources" + File.separator
+                + "task.csv");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8))) {
+            writer.write("Test broken file");
+        } catch (IOException e) {
+            throw new ManagerSaveException("Error: ", e);
+        }
+        FileBackedTasksManager tasksManagerBrokenFile = FileBackedTasksManager.loadFromFile(file);
+
+        assertTrue(tasksManagerBrokenFile.isErrorLoadFile(), "There was no error in downloading the file");
     }
 
 }

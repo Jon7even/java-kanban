@@ -1,10 +1,10 @@
-package main.java.tasks;
+package model;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Subtask extends Task {
-    private final int relationEpicId; // к ID какого эпика относится подзадача
+    private final int relationEpicId;
 
     public Subtask(TaskType type, String name, String description, TaskStatus status, int relationEpicId) {
         super(type, name, description, status, 0L, null);

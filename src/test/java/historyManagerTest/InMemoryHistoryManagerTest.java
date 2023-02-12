@@ -1,7 +1,9 @@
-package service;
+package historyManagerTest;
 
-import service.exception.HistoryManagerAddTask;
 import model.*;
+import service.HistoryManager;
+import service.InMemoryHistoryManager;
+import service.exception.HistoryManagerAddTask;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

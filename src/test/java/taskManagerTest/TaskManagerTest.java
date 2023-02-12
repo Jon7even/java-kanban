@@ -1,7 +1,11 @@
-package historyManagerTest;
+package taskManagerTest;
 
-import historyManagerTest.exception.*;
 import model.*;
+import service.exception.ManagerAddTaskException;
+import service.exception.ManagerGetTaskException;
+import service.exception.ManagerRemoveTaskException;
+import service.exception.ManagerTimeIntersectionsException;
+
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;

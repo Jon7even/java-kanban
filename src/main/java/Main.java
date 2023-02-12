@@ -1,7 +1,5 @@
-package main.java;
-
-import main.java.core.*;
-import main.java.tasks.*;
+import model.*;
+import service.FileBackedTasksManager;
 
 import java.io.File;
 import java.time.LocalDateTime;

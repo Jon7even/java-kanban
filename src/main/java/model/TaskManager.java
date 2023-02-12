@@ -1,8 +1,4 @@
-package service;
-
-import model.Epic;
-import model.Subtask;
-import model.Task;
+package model;
 
 import java.util.List;
 

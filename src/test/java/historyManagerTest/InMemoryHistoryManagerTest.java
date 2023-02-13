@@ -3,7 +3,6 @@ package historyManagerTest;
 import model.*;
 import service.HistoryManager;
 import service.InMemoryHistoryManager;
-import service.exception.HistoryManagerAddTask;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,13 +37,11 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void shouldThrowExceptionAddNullTaskInHistory() {
-        final HistoryManagerAddTask exception = assertThrows(
-                HistoryManagerAddTask.class,
-                () -> {
-                    historyManager.addHistoryTask(null);
-                });
-        assertEquals("Task cannot be null: ", exception.getMessage());
+    public void shouldDontMissAddNullTaskInHistory() {
+        historyManager.addHistoryTask(null);
+        assertNotNull(historyManager.getHistory());
+        List<Task> notNullTask = historyManager.getHistory();
+        assertEquals(0, notNullTask.size(), "Error, add null Task.");
     }
 
     @Test

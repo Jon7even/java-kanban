@@ -1,7 +1,6 @@
 package service;
 
 import model.Task;
-import service.exception.HistoryManagerAddTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,17 +50,14 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void addHistoryTask(Task task) {
-        try {
+        if (task != null) {
             int taskId = task.getId();
 
             if (nodeMap.containsKey(taskId)) {
                 removeHistoryTask(taskId);
             }
             nodeMap.put(taskId, linkLast(task));
-        } catch (NullPointerException exception) {
-            throw new HistoryManagerAddTask("Task cannot be null: ", exception);
         }
-
     }
 
     private Node linkLast(Task task) {

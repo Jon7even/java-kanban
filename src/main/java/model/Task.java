@@ -121,10 +121,8 @@ public class Task {
 
     @Override
     public String toString() {
-        String startTimeToString = "";
-        if (startTime == null) {
-            startTimeToString = "null";
-        } else {
+        String startTimeToString = " ";
+        if (startTime != null) {
             startTimeToString = startTime.format(DATE_TIME_FORMATTER);
         }
         return id + "," + type + "," + name + "," + status + "," + description + "," + duration + ","

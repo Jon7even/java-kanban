@@ -1,6 +1,7 @@
 package taskManagerTest;
 
 import model.*;
+import service.TaskManager;
 import service.exception.ManagerAddTaskException;
 import service.exception.ManagerGetTaskException;
 import service.exception.ManagerRemoveTaskException;

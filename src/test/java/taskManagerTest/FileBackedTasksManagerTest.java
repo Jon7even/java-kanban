@@ -2,6 +2,7 @@ package taskManagerTest;
 
 import service.FileBackedTasksManager;
 import model.*;
+import service.exception.ManagerLoadFromFileException;
 import service.exception.ManagerSaveException;
 
 import org.junit.jupiter.api.AfterEach;
@@ -152,9 +153,14 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         } catch (IOException e) {
             throw new ManagerSaveException("Error: ", e);
         }
-        FileBackedTasksManager tasksManagerBrokenFile = FileBackedTasksManager.loadFromFile(file);
 
-        assertTrue(tasksManagerBrokenFile.isErrorLoadFile(), "There was no error in downloading the file");
+
+        final ManagerLoadFromFileException exceptionErrorLoadFile = assertThrows(
+                ManagerLoadFromFileException.class,
+                () -> {
+                    FileBackedTasksManager.loadFromFile(file);
+                });
+        assertEquals("File is broken, recovery is impossible", exceptionErrorLoadFile.getMessage());
     }
 
 }

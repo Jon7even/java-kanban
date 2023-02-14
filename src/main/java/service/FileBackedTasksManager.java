@@ -14,7 +14,6 @@ import static model.Task.DATE_TIME_FORMATTER;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
     private final File file;
-    private boolean isErrorLoadOriginalFile = false;
     private static final String columnNamesCSV = "id,type,name,status,description,epic,duration,startTime";
 
     private FileBackedTasksManager(File file) {
@@ -33,9 +32,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 final String firstLine = bufferedReader.readLine();
 
                 if (firstLine == null || !firstLine.equals(columnNamesCSV)) {
-                    System.out.println("File is broken, recovery is impossible");
-                    tasksManager.isErrorLoadOriginalFile = true;
-                    return tasksManager;
+                    throw new ManagerLoadFromFileException("File is broken, recovery is impossible");
                 }
 
                 while (bufferedReader.ready()) {
@@ -277,10 +274,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             list.add(Integer.parseInt(idTask));
         }
         return list;
-    }
-
-    public boolean isErrorLoadFile() {
-        return isErrorLoadOriginalFile;
     }
 
 }

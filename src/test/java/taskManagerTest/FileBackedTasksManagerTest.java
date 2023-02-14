@@ -3,7 +3,6 @@ package taskManagerTest;
 import service.FileBackedTasksManager;
 import model.*;
 import service.exception.ManagerSaveException;
-import service.exception.ManagerGetTaskException;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -92,13 +91,8 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
 
         assertNotNull(recoveredEpic, "Epics don't recovered.");
         assertEquals(savedEpic, recoveredEpic, "Epics don't match.");
-
-        final ManagerGetTaskException exception = assertThrows(
-                ManagerGetTaskException.class,
-                () -> {
-                    tasksManagerEpicWithoutSubtask.getAllSubTaskForEpic(recoveredEpic.getId());
-                });
-        assertEquals("Error, Subtasks not found!", exception.getMessage());
+        assertNull(tasksManagerEpicWithoutSubtask.getAllSubTaskForEpic(recoveredEpic.getId()),
+                "Subtask should not have been received");
     }
 
     @Test

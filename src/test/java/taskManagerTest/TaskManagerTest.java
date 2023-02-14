@@ -2,9 +2,6 @@ package taskManagerTest;
 
 import model.*;
 import service.TaskManager;
-import service.exception.ManagerAddTaskException;
-import service.exception.ManagerGetTaskException;
-import service.exception.ManagerRemoveTaskException;
 import service.exception.ManagerTimeIntersectionsException;
 
 import org.junit.jupiter.api.Test;
@@ -59,12 +56,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(2, tasks.size(), "Tasks don't match");
         assertEquals(taskNew, tasks.get(0), "Tasks don't match");
 
-        final ManagerAddTaskException exception = assertThrows(
-                ManagerAddTaskException.class,
-                () -> {
-                    taskManager.addNewTask(null);
-                });
-        assertEquals("Error, Task cannot be passed: ", exception.getMessage());
+        assertEquals(-1, taskManager.addNewTask(null), "Task null shouldn't have been added");
     }
 
     @Test
@@ -84,13 +76,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertNotNull(epics, "Epics don't return");
         assertEquals(2, epics.size(), "Epics don't match");
         assertEquals(epicNew, epics.get(0), "Epics don't match");
-
-        final ManagerAddTaskException exception = assertThrows(
-                ManagerAddTaskException.class,
-                () -> {
-                    taskManager.addNewEpic(null);
-                });
-        assertEquals("Error, Epic cannot be passed: ", exception.getMessage());
+        assertEquals(-1, taskManager.addNewEpic(null), "Epic null shouldn't have been added");
     }
 
     @Test
@@ -112,13 +98,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertNotNull(subtask, "Subtasks don't return");
         assertEquals(1, subtask.size(), "Subtask don't match");
         assertEquals(subtaskNew, subtask.get(0), "Subtask don't match");
-
-        final ManagerAddTaskException exception = assertThrows(
-                ManagerAddTaskException.class,
-                () -> {
-                    taskManager.addNewSubtask(null);
-                });
-        assertEquals("Error, Subtask cannot be passed: ", exception.getMessage());
+        assertEquals(-1, taskManager.addNewSubtask(null), "Subtask null shouldn't have been added");
     }
 
     @Test
@@ -127,12 +107,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         final int epicId = taskManager.addNewEpic(epicNew);
         taskManager.addNewEpic(epicNew);
 
-        final ManagerGetTaskException exceptionEpicNotSubtask = assertThrows(
-                ManagerGetTaskException.class,
-                () -> {
-                    taskManager.getAllSubTaskForEpic(epicId);
-                });
-        assertEquals("Error, Subtasks not found!", exceptionEpicNotSubtask.getMessage());
+        assertNull(taskManager.getAllSubTaskForEpic(epicId), "Subtasks should not have been received");
 
         Subtask subtaskNew1 = new Subtask(TaskType.SUBTASK, "Test Subtask",
                 "Subtask test description", TaskStatus.NEW, 15,
@@ -148,14 +123,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.addNewSubtask(subtaskNew2);
 
         List<Subtask> subtasksSizeTwo = taskManager.getAllSubTaskForEpic(epicId);
-        assertEquals(2, subtasksSizeTwo.size(), "Subtask don't match");
 
-        final ManagerGetTaskException exceptionEpicNull = assertThrows(
-                ManagerGetTaskException.class,
-                () -> {
-                    taskManager.getAllSubTaskForEpic(3);
-                });
-        assertEquals("Error, Epic with id 3 cannot be received!", exceptionEpicNull.getMessage());
+        assertEquals(2, subtasksSizeTwo.size(), "Subtask don't match");
+        assertNull(taskManager.getAllSubTaskForEpic(3), "Subtasks should not have been received");
     }
 
     @Test
@@ -171,13 +141,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Task taskGetUpdate = taskManager.getTask(idNewTask);
 
         assertEquals(taskUpdate, taskGetUpdate, "Tasks don't match");
-
-        final ManagerAddTaskException exceptionAddTaskNull = assertThrows(
-                ManagerAddTaskException.class,
-                () -> {
-                    taskManager.updateTask(null);
-                });
-        assertEquals("Error, Task cannot be passed: ", exceptionAddTaskNull.getMessage());
     }
 
     @Test
@@ -198,13 +161,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtaskGetUpdate = taskManager.getSubtask(idNewSubtask);
 
         assertEquals(subtaskUpdate, subtaskGetUpdate, "Subtasks don't match");
-
-        final ManagerAddTaskException exceptionAddSubtaskNull = assertThrows(
-                ManagerAddTaskException.class,
-                () -> {
-                    taskManager.updateSubtask(null);
-                });
-        assertEquals("Error, Subtask cannot be passed: ", exceptionAddSubtaskNull.getMessage());
     }
 
     @Test
@@ -219,13 +175,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic epicGetUpdate = taskManager.getEpic(idNewEpic);
 
         assertEquals(epicUpdate, epicGetUpdate, "Subtasks don't match");
-
-        final ManagerAddTaskException exceptionAddEpicNull = assertThrows(
-                ManagerAddTaskException.class,
-                () -> {
-                    taskManager.updateEpic(null);
-                });
-        assertEquals("Error, Epic cannot be passed: ", exceptionAddEpicNull.getMessage());
     }
 
     @Test
@@ -282,13 +231,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         List<Task> emptyTasks = taskManager.getTasks();
         assertEquals(0, emptyTasks.size(), "Tasks list don't empty.");
-
-        final ManagerRemoveTaskException exceptionRemoveTask = assertThrows(
-                ManagerRemoveTaskException.class,
-                () -> {
-                    taskManager.removeTask(2);
-                });
-        assertEquals("Error, Task with id 2 cannot be deleted!", exceptionRemoveTask.getMessage());
     }
 
     @Test
@@ -301,13 +243,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         List<Subtask> emptySubtasks = taskManager.getSubtasks();
         assertEquals(0, emptySubtasks.size(), "Subtasks list don't empty.");
-
-        final ManagerRemoveTaskException exceptionRemoveSubtask = assertThrows(
-                ManagerRemoveTaskException.class,
-                () -> {
-                    taskManager.removeSubtask(5);
-                });
-        assertEquals("Error, Subtask with id 5 cannot be deleted!", exceptionRemoveSubtask.getMessage());
     }
 
     @Test
@@ -318,13 +253,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         List<Epic> emptyEpics = taskManager.getEpics();
         assertEquals(0, emptyEpics.size(), "Epics list don't empty.");
-
-        final ManagerRemoveTaskException exceptionRemoveEpics = assertThrows(
-                ManagerRemoveTaskException.class,
-                () -> {
-                    taskManager.removeEpic(2);
-                });
-        assertEquals("Error, Epic with id 2 cannot be deleted!", exceptionRemoveEpics.getMessage());
     }
 
     @Test
@@ -333,13 +261,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Task getTask = taskManager.getTask(idAddTask);
 
         assertNotNull(getTask, "Task Null!");
-
-        final ManagerGetTaskException exceptionAddTask = assertThrows(
-                ManagerGetTaskException.class,
-                () -> {
-                    taskManager.getTask(2);
-                });
-        assertEquals("Error, Task with id 2 cannot be received!", exceptionAddTask.getMessage());
+        assertNull(taskManager.getTask(2), "Error, Task with id 2 cannot be received!");
     }
 
     @Test
@@ -348,13 +270,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic getEpic = taskManager.getEpic(idAddEpic);
 
         assertNotNull(getEpic, "Epic Null!");
-
-        final ManagerGetTaskException exceptionAddEpic = assertThrows(
-                ManagerGetTaskException.class,
-                () -> {
-                    taskManager.getEpic(2);
-                });
-        assertEquals("Error, Epic with id 2 cannot be received!", exceptionAddEpic.getMessage());
+        assertNull(taskManager.getEpic(2), "Error, Epic with id 2 cannot be received!");
     }
 
     @Test
@@ -365,28 +281,16 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Subtask getSubtask = taskManager.getSubtask(idAddSubtask);
 
         assertNotNull(getSubtask, "Subtask Null!");
-
-        final ManagerGetTaskException exceptionAddSubtask = assertThrows(
-                ManagerGetTaskException.class,
-                () -> {
-                    taskManager.getSubtask(2);
-                });
-        assertEquals("Error, Subtask with id 2 cannot be received!", exceptionAddSubtask.getMessage());
+        assertNull(taskManager.getSubtask(2), "Error, Subtask with id 2 cannot be received!");
     }
 
     @Test
-    public void shouldThrowExceptionWhenAddSubtaskWrongEpicId() {
+    public void shouldReturnNegativeNumberWhenAddSubtaskWrongEpicId() {
         taskManager.addNewEpic(epic1);
         Subtask subtaskWrongEpicId = new Subtask(TaskType.SUBTASK, "Test Subtask",
                 "Subtask test description", TaskStatus.NEW, 15,
                 LocalDateTime.of(2023, 1, 1, 2, 0), 2);
-
-        final ManagerGetTaskException exceptionEpicDontExist = assertThrows(
-                ManagerGetTaskException.class,
-                () -> {
-                    taskManager.addNewSubtask(subtaskWrongEpicId);
-                });
-        assertEquals("Error, Epic cannot be received!", exceptionEpicDontExist.getMessage());
+        assertEquals(-1, taskManager.addNewSubtask(subtaskWrongEpicId), "Error, Epic cannot be received!");
     }
 
     @Test

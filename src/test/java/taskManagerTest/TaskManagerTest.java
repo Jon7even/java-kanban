@@ -532,7 +532,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 () -> {
                     taskManager.addNewTask(task);
                 });
-        assertEquals("Task overlap in time. Task id - 1\n    "
+        assertEquals("Task overlap in time. Task id - " + task.getId() + "\n    "
                 + "Conflict in period: 00:00 01.01.23 - 00:15 01.01.23", exceptionSubtaskBusyTime.getMessage());
     }
 

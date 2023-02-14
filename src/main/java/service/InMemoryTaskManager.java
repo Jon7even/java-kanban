@@ -30,30 +30,11 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public int addNewTask(Task task) {
         if (task != null) {
-            LocalDateTime startTime = task.getStartTime();
-            LocalDateTime endTime = task.getEndTime();
-
-            if (startTime == null) {
-                prioritizedTasks.add(task);
-                int id = ++idGenerate;
-                task.setId(id);
-                tasks.put(id, task);
-                return id;
-            }
-
-            if (!isConflictTimeIntersection(startTime, endTime)) {
-                prioritizedTasks.add(task);
-                setIntervalsYearlyTimeTable(listsInterval(startTime, endTime), true);
-                int id = ++idGenerate;
-                task.setId(id);
-                tasks.put(id, task);
-                return id;
-            } else {
-                throw new ManagerTimeIntersectionsException("Task overlap in time. " + "Task id - "
-                        + task.getId() + "\n    Conflict in period: "
-                        + startTime.format(DATE_TIME_FORMATTER) + " - "
-                        + endTime.format(DATE_TIME_FORMATTER));
-            }
+            int id = ++idGenerate;
+            task.setId(id);
+            tasks.put(id, task);
+            addTaskInPrioritizedTasks(task);
+            return id;
         } else {
             return -1;
         }
@@ -74,45 +55,18 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Integer addNewSubtask(Subtask subtask) {
         if (subtask != null) {
-            LocalDateTime startTime = subtask.getStartTime();
-            LocalDateTime endTime = subtask.getEndTime();
-
-            if (startTime == null) {
-                prioritizedTasks.add(subtask);
-                Epic epic = epicTasks.get(subtask.getRelationEpicId());
-                if (epic == null) {
-                    return -1;
-                } else {
-                    int id = ++idGenerate;
-                    subtask.setId(id);
-                    subTasks.put(id, subtask);
-                    epic.addSubtaskId(id);
-                    updateEpicTime(epic);
-                    updateEpicStatus(epic);
-                    return id;
-                }
-            }
-
-            if (!isConflictTimeIntersection(startTime, endTime)) {
-                prioritizedTasks.add(subtask);
-                Epic epic = epicTasks.get(subtask.getRelationEpicId());
-                if (epic == null) {
-                    return -1;
-                } else {
-                    setIntervalsYearlyTimeTable(listsInterval(startTime, endTime), true);
-                    int id = ++idGenerate;
-                    subtask.setId(id);
-                    subTasks.put(id, subtask);
-                    epic.addSubtaskId(id);
-                    updateEpicTime(epic);
-                    updateEpicStatus(epic);
-                    return id;
-                }
+            Epic epic = epicTasks.get(subtask.getRelationEpicId());
+            if (epic == null) {
+                return -1;
             } else {
-                throw new ManagerTimeIntersectionsException("SubTask overlap in time. " + "Subtask id - "
-                        + subtask.getId() + "\n    Conflict in period: "
-                        + startTime.format(DATE_TIME_FORMATTER) + " - "
-                        + endTime.format(DATE_TIME_FORMATTER));
+                int id = ++idGenerate;
+                subtask.setId(id);
+                subTasks.put(id, subtask);
+                epic.addSubtaskId(id);
+                addTaskInPrioritizedTasks(subtask);
+                updateEpicTime(epic);
+                updateEpicStatus(epic);
+                return id;
             }
         } else {
             return -1;
@@ -157,29 +111,9 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateTask(Task task) {
         if (tasks.get(task.getId()) != null) {
             int idTask = task.getId();
-            LocalDateTime startTime = task.getStartTime();
-            LocalDateTime endTime = task.getEndTime();
-            LocalDateTime oldStartTime = tasks.get(idTask).getStartTime();
-            LocalDateTime oldEndTime = tasks.get(idTask).getEndTime();
-            List<Integer> oldTimeInterval = listsInterval(oldStartTime, oldEndTime);
-
-            prioritizedTasks.remove(tasks.get(idTask));
-            prioritizedTasks.add(task);
-
-            if (oldTimeInterval.equals(listsInterval(startTime, endTime))) {
-                tasks.put(idTask, task);
-            } else {
-                setIntervalsYearlyTimeTable(oldTimeInterval, false);
-                if (!isConflictTimeIntersection(startTime, endTime)) {
-                    setIntervalsYearlyTimeTable(listsInterval(startTime, endTime), true);
-                    tasks.put(idTask, task);
-                } else {
-                    throw new ManagerTimeIntersectionsException("Task overlap in time. " + "Task id - "
-                            + task.getId() + "\n    Conflict in period: "
-                            + startTime.format(DATE_TIME_FORMATTER) + " - "
-                            + endTime.format(DATE_TIME_FORMATTER));
-                }
-            }
+            updateTaskInPrioritizedTasks(task, tasks.get(idTask).getStartTime(), tasks.get(idTask).getEndTime(),
+                    tasks.get(task.getId()));
+            tasks.put(idTask, task);
         }
     }
 
@@ -196,42 +130,18 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateSubtask(Subtask subtask) {
         if (subTasks.get(subtask.getId()) != null) {
             int idSubtask = subtask.getId();
-            LocalDateTime startTime = subtask.getStartTime();
-            LocalDateTime endTime = subtask.getEndTime();
-            LocalDateTime oldStartTime = subTasks.get(idSubtask).getStartTime();
-            LocalDateTime oldEndTime = subTasks.get(idSubtask).getEndTime();
-            List<Integer> oldTimeInterval = listsInterval(oldStartTime, oldEndTime);
-
-            prioritizedTasks.remove(subTasks.get(idSubtask));
-            prioritizedTasks.add(subtask);
-
-            if (oldTimeInterval.equals(listsInterval(startTime, endTime))) {
-                subTasks.put(idSubtask, subtask);
-                Epic epic = epicTasks.get(subtask.getRelationEpicId());
-                updateEpicStatus(epic);
-                updateEpicTime(epic);
-            } else {
-                setIntervalsYearlyTimeTable(oldTimeInterval, false);
-                if (!isConflictTimeIntersection(startTime, endTime)) {
-                    setIntervalsYearlyTimeTable(listsInterval(startTime, endTime), true);
-                    subTasks.put(idSubtask, subtask);
-                    Epic epic = epicTasks.get(subtask.getRelationEpicId());
-                    updateEpicStatus(epic);
-                    updateEpicTime(epic);
-                } else {
-                    throw new ManagerTimeIntersectionsException("SubTask overlap in time. " + "Subtask id - "
-                            + subtask.getId() + "\n    Conflict in period: "
-                            + startTime.format(DATE_TIME_FORMATTER) + " - "
-                            + endTime.format(DATE_TIME_FORMATTER));
-                }
-            }
+            updateTaskInPrioritizedTasks(subtask, subTasks.get(idSubtask).getStartTime(),
+                    subTasks.get(idSubtask).getEndTime(), subTasks.get(idSubtask));
+            subTasks.put(idSubtask, subtask);
+            Epic epic = epicTasks.get(subtask.getRelationEpicId());
+            updateEpicStatus(epic);
+            updateEpicTime(epic);
         }
     }
 
     @Override
     public void deleteAllTasks() {
         for (Integer id : tasks.keySet()) {
-
             historyManager.removeHistoryTask(id);
             prioritizedTasks.remove(tasks.get(id));
             setIntervalsYearlyTimeTable(listsInterval(tasks.get(id).getStartTime(),
@@ -498,6 +408,47 @@ public class InMemoryTaskManager implements TaskManager {
             epic.setStatus(TaskStatus.DONE);
         } else {
             epic.setStatus(TaskStatus.IN_PROGRESS);
+        }
+    }
+
+    private void addTaskInPrioritizedTasks(Task task) {
+        LocalDateTime startTime = task.getStartTime();
+        LocalDateTime endTime = task.getEndTime();
+
+        if (startTime != null) {
+            if (!isConflictTimeIntersection(startTime, endTime)) {
+                prioritizedTasks.add(task);
+                setIntervalsYearlyTimeTable(listsInterval(startTime, endTime), true);
+            } else {
+                throw new ManagerTimeIntersectionsException("Task overlap in time. " + "Task id - "
+                        + task.getId() + "\n    Conflict in period: "
+                        + startTime.format(DATE_TIME_FORMATTER) + " - "
+                        + endTime.format(DATE_TIME_FORMATTER));
+            }
+        } else {
+            prioritizedTasks.add(task);
+        }
+    }
+
+    private void updateTaskInPrioritizedTasks(Task task, LocalDateTime oldStartTime, LocalDateTime oldEndTime,
+                                              Task removeTask) {
+        LocalDateTime startTime = task.getStartTime();
+        LocalDateTime endTime = task.getEndTime();
+        List<Integer> oldTimeInterval = listsInterval(oldStartTime, oldEndTime);
+
+        prioritizedTasks.remove(removeTask);
+        prioritizedTasks.add(task);
+
+        if (!oldTimeInterval.equals(listsInterval(startTime, endTime))) {
+            setIntervalsYearlyTimeTable(oldTimeInterval, false);
+            if (!isConflictTimeIntersection(startTime, endTime)) {
+                setIntervalsYearlyTimeTable(listsInterval(startTime, endTime), true);
+            } else {
+                throw new ManagerTimeIntersectionsException("Task overlap in time. " + "Task id - "
+                        + task.getId() + "\n    Conflict in period: "
+                        + startTime.format(DATE_TIME_FORMATTER) + " - "
+                        + endTime.format(DATE_TIME_FORMATTER));
+            }
         }
     }
 

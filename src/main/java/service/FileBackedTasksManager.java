@@ -226,10 +226,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         final long duration = Long.parseLong((values[5]));
         final LocalDateTime startTime;
 
-        if (String.valueOf(values[6]).isBlank()) {
-            startTime = null;
-        } else {
+        if (values.length == 7 || values.length == 8) {
             startTime = LocalDateTime.parse(values[6], DATE_TIME_FORMATTER);
+        } else {
+            startTime = null;
         }
 
         final Task task;

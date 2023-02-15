@@ -44,7 +44,7 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        String startTimeToString = " ";
+        String startTimeToString = "";
         if (startTime != null) {
             startTimeToString = startTime.format(DATE_TIME_FORMATTER);
         }

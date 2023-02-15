@@ -107,7 +107,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         final int epicId = taskManager.addNewEpic(epicNew);
         taskManager.addNewEpic(epicNew);
 
-        assertNull(taskManager.getAllSubTaskForEpic(epicId), "Subtasks should not have been received");
+        assertNotNull(taskManager.getAllSubTaskForEpic(epicId), "Subtasks should not have been received");
 
         Subtask subtaskNew1 = new Subtask(TaskType.SUBTASK, "Test Subtask",
                 "Subtask test description", TaskStatus.NEW, 15,
@@ -125,7 +125,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         List<Subtask> subtasksSizeTwo = taskManager.getAllSubTaskForEpic(epicId);
 
         assertEquals(2, subtasksSizeTwo.size(), "Subtask don't match");
-        assertNull(taskManager.getAllSubTaskForEpic(3), "Subtasks should not have been received");
+        assertNotNull(taskManager.getAllSubTaskForEpic(3), "Subtasks should not have been received");
     }
 
     @Test

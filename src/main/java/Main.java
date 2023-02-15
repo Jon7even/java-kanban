@@ -61,7 +61,8 @@ public class Main {
         System.out.println(tasksManagerFBTest.getSubtasks());
         System.out.println(tasksManagerFBTest.getHistory());
         System.out.println(tasksManagerFBTest.getPrioritizedTasks());
-
+        System.out.println(tasksManagerFBTest.getAllSubTaskForEpic(epicId1));
+        System.out.println(tasksManagerFBTest.getAllSubTaskForEpic(epicId2));
         System.out.println(tasksManagerFBTest.getEpic(epicId1).getEndTime());
         System.out.println(tasksManagerFBTest.getEpic(epicId2).getEndTime());
     }

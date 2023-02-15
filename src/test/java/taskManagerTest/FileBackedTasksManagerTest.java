@@ -92,7 +92,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
 
         assertNotNull(recoveredEpic, "Epics don't recovered.");
         assertEquals(savedEpic, recoveredEpic, "Epics don't match.");
-        assertNull(tasksManagerEpicWithoutSubtask.getAllSubTaskForEpic(recoveredEpic.getId()),
+        assertNotNull(tasksManagerEpicWithoutSubtask.getAllSubTaskForEpic(recoveredEpic.getId()),
                 "Subtask should not have been received");
     }
 

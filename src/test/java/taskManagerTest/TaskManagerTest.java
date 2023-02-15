@@ -186,10 +186,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Task taskNew = new Task(TaskType.TASK, "Test Task", "Task test description",
                 TaskStatus.NEW, 15, LocalDateTime.of(2023, 1, 1, 1, 17));
         taskManager.addNewTask(taskNew);
-
         taskManager.deleteAllTasks();
-
         List<Task> emptyAfterDeleteAllTask = taskManager.getTasks();
+
         assertEquals(0, emptyAfterDeleteAllTask.size(), "Tasks list don't empty.");
     }
 
@@ -203,8 +202,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.addNewSubtask(subtask2);
 
         taskManager.deleteAllSubtasks();
-
         List<Subtask> emptyAfterDeleteAllSubtask = taskManager.getSubtasks();
+
         assertEquals(0, emptyAfterDeleteAllSubtask.size(), "Subtasks list don't empty.");
     }
 
@@ -218,8 +217,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.addNewSubtask(subtask2);
 
         taskManager.deleteAllSubtasks();
-
         List<Subtask> emptyAfterDeleteAllEpics = taskManager.getSubtasks();
+
         assertEquals(0, emptyAfterDeleteAllEpics.size(), "Epics list don't empty.");
     }
 
@@ -228,8 +227,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         int idDeleteTask = taskManager.addNewTask(task);
 
         taskManager.removeTask(idDeleteTask);
-
         List<Task> emptyTasks = taskManager.getTasks();
+
         assertEquals(0, emptyTasks.size(), "Tasks list don't empty.");
     }
 
@@ -240,8 +239,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         int idDeleteSubtask = taskManager.addNewSubtask(subtask1);
 
         taskManager.removeSubtask(idDeleteSubtask);
-
         List<Subtask> emptySubtasks = taskManager.getSubtasks();
+
         assertEquals(0, emptySubtasks.size(), "Subtasks list don't empty.");
     }
 
@@ -250,8 +249,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         int idDeleteEpic = taskManager.addNewEpic(epic1);
 
         taskManager.removeEpic(idDeleteEpic);
-
         List<Epic> emptyEpics = taskManager.getEpics();
+
         assertEquals(0, emptyEpics.size(), "Epics list don't empty.");
     }
 
@@ -339,8 +338,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtaskEdit = taskManager.getSubtask(idSubtask);
         subtaskEdit.setStatus(TaskStatus.DONE);
         taskManager.updateSubtask(subtaskEdit);
-
         Epic getEpic = taskManager.getEpic(idAddEpic);
+
         assertEquals(TaskStatus.IN_PROGRESS, getEpic.getStatus(), "Epic Status don't match.");
     }
 
@@ -358,8 +357,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtaskEdit2 = taskManager.getSubtask(idSubtask2);
         subtaskEdit2.setStatus(TaskStatus.IN_PROGRESS);
         taskManager.updateSubtask(subtaskEdit2);
-
         Epic getEpic = taskManager.getEpic(idAddEpic);
+
         assertEquals(TaskStatus.IN_PROGRESS, getEpic.getStatus(), "Epic Status don't match.");
     }
 
@@ -532,8 +531,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 () -> {
                     taskManager.addNewTask(task);
                 });
-        assertEquals("Task overlap in time. Task id - " + task.getId() + "\n    "
-                + "Conflict in period: 00:00 01.01.23 - 00:15 01.01.23", exceptionSubtaskBusyTime.getMessage());
+        assertEquals("Task overlap in time. Conflict in period: 00:00 01.01.23 - 00:15 01.01.23",
+                exceptionSubtaskBusyTime.getMessage());
     }
 
 }

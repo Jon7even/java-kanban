@@ -154,7 +154,6 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
             throw new ManagerSaveException("Error: ", e);
         }
 
-
         final ManagerLoadFromFileException exceptionErrorLoadFile = assertThrows(
                 ManagerLoadFromFileException.class,
                 () -> {

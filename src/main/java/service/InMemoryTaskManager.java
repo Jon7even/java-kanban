@@ -312,39 +312,28 @@ public class InMemoryTaskManager implements TaskManager {
         return listsInterval;
     }
 
-    protected void updateYearlyTimeTable() {
+    private void updateYearlyTimeTableTask(LocalDateTime startTime, LocalDateTime endTime) {
+        if (startTime != null) {
+            if (!isConflictTimeIntersection(startTime, endTime)) {
+                setIntervalsYearlyTimeTable(listsInterval(startTime, endTime), true);
+            } else {
+                throw new ManagerTimeIntersectionsException("Task overlap in time. Conflict in period: "
+                        + startTime.format(DATE_TIME_FORMATTER) + " - "
+                        + endTime.format(DATE_TIME_FORMATTER));
+            }
+        }
+    }
+
+    protected void updateYearlyTimeTableAllTasksAndSubtasks() {
         for (Task task : tasks.values()) {
-            LocalDateTime startTime = task.getStartTime();
-            LocalDateTime endTime = task.getEndTime();
-
-            if (!isConflictTimeIntersection(startTime, endTime)) {
-                setIntervalsYearlyTimeTable(listsInterval(startTime, endTime), true);
-            } else {
-                throw new ManagerTimeIntersectionsException("Task overlap in time. " + "Task id - "
-                        + task.getId() + "\n    Conflict in period: "
-                        + startTime.format(DATE_TIME_FORMATTER) + " - "
-                        + endTime.format(DATE_TIME_FORMATTER));
-            }
+            updateYearlyTimeTableTask(task.getStartTime(), task.getEndTime());
         }
-
         for (Subtask subtask : subTasks.values()) {
-            LocalDateTime startTime = subtask.getStartTime();
-            LocalDateTime endTime = subtask.getEndTime();
-
-            if (!isConflictTimeIntersection(startTime, endTime)) {
-                setIntervalsYearlyTimeTable(listsInterval(startTime, endTime), true);
-            } else {
-                throw new ManagerTimeIntersectionsException("Subtask overlap in time. " + "Subtask id - "
-                        + subtask.getId() + "\n    Conflict in period: "
-                        + startTime.format(DATE_TIME_FORMATTER) + " - "
-                        + endTime.format(DATE_TIME_FORMATTER));
-            }
+            updateYearlyTimeTableTask(subtask.getStartTime(), subtask.getEndTime());
         }
-
         for (Epic epic : epicTasks.values()) {
             updateEpicTime(epic);
         }
-
     }
 
     private int calculateDayOfYear(int dayOfYear) {
@@ -408,22 +397,8 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private void addTaskInPrioritizedTasks(Task task) {
-        LocalDateTime startTime = task.getStartTime();
-        LocalDateTime endTime = task.getEndTime();
-
-        if (startTime != null) {
-            if (!isConflictTimeIntersection(startTime, endTime)) {
-                prioritizedTasks.add(task);
-                setIntervalsYearlyTimeTable(listsInterval(startTime, endTime), true);
-            } else {
-                throw new ManagerTimeIntersectionsException("Task overlap in time. " + "Task id - "
-                        + task.getId() + "\n    Conflict in period: "
-                        + startTime.format(DATE_TIME_FORMATTER) + " - "
-                        + endTime.format(DATE_TIME_FORMATTER));
-            }
-        } else {
-            prioritizedTasks.add(task);
-        }
+        updateYearlyTimeTableTask(task.getStartTime(), task.getEndTime());
+        prioritizedTasks.add(task);
     }
 
     private void updateTaskInPrioritizedTasks(Task task, LocalDateTime oldStartTime, LocalDateTime oldEndTime,
@@ -437,14 +412,7 @@ public class InMemoryTaskManager implements TaskManager {
 
         if (!oldTimeInterval.equals(listsInterval(startTime, endTime))) {
             setIntervalsYearlyTimeTable(oldTimeInterval, false);
-            if (!isConflictTimeIntersection(startTime, endTime)) {
-                setIntervalsYearlyTimeTable(listsInterval(startTime, endTime), true);
-            } else {
-                throw new ManagerTimeIntersectionsException("Task overlap in time. " + "Task id - "
-                        + task.getId() + "\n    Conflict in period: "
-                        + startTime.format(DATE_TIME_FORMATTER) + " - "
-                        + endTime.format(DATE_TIME_FORMATTER));
-            }
+            updateYearlyTimeTableTask(startTime, endTime);
         }
     }
 

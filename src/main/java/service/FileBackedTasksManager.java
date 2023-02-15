@@ -7,6 +7,7 @@ import service.exception.ManagerSaveException;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,7 +87,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     }
                 }
             }
-            tasksManager.updateYearlyTimeTable();
+            tasksManager.updateYearlyTimeTableAllTasksAndSubtasks();
             tasksManager.prioritizedTasks.addAll(tasksManager.tasks.values());
             tasksManager.prioritizedTasks.addAll(tasksManager.subTasks.values());
 
@@ -216,6 +217,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         save();
     }
 
+    private static Boolean isLocalDataTime(String dateStr) {
+        try {
+            DATE_TIME_FORMATTER.parse(dateStr);
+        } catch (DateTimeParseException e) {
+            return false;
+        }
+        return true;
+    }
+
     public static Task fromString(String value) {
         final String[] values = value.split(",");
         final int id = Integer.parseInt(values[0]);
@@ -227,7 +237,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         final LocalDateTime startTime;
 
         if (values.length == 7 || values.length == 8) {
-            startTime = LocalDateTime.parse(values[6], DATE_TIME_FORMATTER);
+            if (isLocalDataTime(String.valueOf(values[6]))) {
+                startTime = LocalDateTime.parse(values[6], DATE_TIME_FORMATTER);
+            } else {
+                startTime = null;
+            }
         } else {
             startTime = null;
         }

@@ -30,10 +30,10 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public int addNewTask(Task task) {
         if (task != null) {
+            addTaskInPrioritizedTasks(task);
             int id = ++idGenerate;
             task.setId(id);
             tasks.put(id, task);
-            addTaskInPrioritizedTasks(task);
             return id;
         } else {
             return -1;
@@ -59,11 +59,11 @@ public class InMemoryTaskManager implements TaskManager {
             if (epic == null) {
                 return -1;
             } else {
+                addTaskInPrioritizedTasks(subtask);
                 int id = ++idGenerate;
                 subtask.setId(id);
                 subTasks.put(id, subtask);
                 epic.addSubtaskId(id);
-                addTaskInPrioritizedTasks(subtask);
                 updateEpicTime(epic);
                 updateEpicStatus(epic);
                 return id;

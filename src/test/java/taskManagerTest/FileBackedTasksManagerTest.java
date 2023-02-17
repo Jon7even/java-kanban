@@ -24,8 +24,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
 
     @BeforeEach
     public void setUp() {
-        file = new File("src" + File.separator + "test" + File.separator + "resources" + File.separator
-                + "task.csv");
+        file = new File("out" + File.separator + "task.csv");
         taskManager = FileBackedTasksManager.loadFromFile(file);
         initTasks();
     }
@@ -146,8 +145,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
 
     @Test
     public void shouldThrowExceptionLoadFromBrokenFile() {
-        file = new File("src" + File.separator + "test" + File.separator + "resources" + File.separator
-                + "task.csv");
+        file = new File("out" + File.separator + "task.csv");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8))) {
             writer.write("Test broken file");
         } catch (IOException e) {

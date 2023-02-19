@@ -1,11 +1,16 @@
 import model.*;
 import service.FileBackedTasksManager;
+import service.server.KVServer;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        new KVServer().start();
+
+
         File file = new File("src" + File.separator + "main" + File.separator + "resources" + File.separator
                 + "task.csv");
 

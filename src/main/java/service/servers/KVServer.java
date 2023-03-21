@@ -1,4 +1,4 @@
-package service.server;
+package service.servers;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 

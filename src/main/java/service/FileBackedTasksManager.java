@@ -17,6 +17,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     private final File file;
     private static final String columnNamesCSV = "id,type,name,status,description,epic,duration,startTime";
 
+    private FileBackedTasksManager() {
+        this.file = null;
+    }
+
     private FileBackedTasksManager(File file) {
         this.file = file;
     }

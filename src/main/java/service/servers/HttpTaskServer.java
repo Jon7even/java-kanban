@@ -1,4 +1,4 @@
-package service.http;
+package service.servers;
 
 public class HttpTaskServer {
 }

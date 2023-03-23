@@ -1,17 +1,17 @@
 package service;
 
-//import service.http.HttpTaskManager;
+
+import java.io.File;
 
 public class Managers {
     private Managers() {
     }
 
     public static TaskManager getDefault() {
-        return new InMemoryTaskManager();
+        File file = new File("src" + File.separator + "main" + File.separator + "resources" + File.separator
+                + "task.csv");
+        return new FileBackedTasksManager(file);
     }
-/*    public static TaskManager getDefault() {
-        return new HttpTaskManager();
-    }*/
 
     public static HistoryManager getDefaultHistory() {
         return new InMemoryHistoryManager();

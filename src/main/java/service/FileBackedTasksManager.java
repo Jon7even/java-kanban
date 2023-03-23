@@ -11,17 +11,17 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static model.Task.DATE_TIME_FORMATTER;
+import static service.adapters.LocalDateAdapter.DATE_TIME_FORMATTER;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
     private final File file;
     private static final String columnNamesCSV = "id,type,name,status,description,epic,duration,startTime";
 
-    private FileBackedTasksManager() {
+    protected FileBackedTasksManager() {
         this.file = null;
     }
 
-    private FileBackedTasksManager(File file) {
+    protected FileBackedTasksManager(File file) {
         this.file = file;
     }
 

@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
+import static service.adapters.LocalDateAdapter.DATE_TIME_FORMATTER;
+
 public class Task {
     protected int id;
     protected TaskType type;
@@ -12,7 +14,6 @@ public class Task {
     protected TaskStatus status;
     protected long duration;
     protected LocalDateTime startTime;
-    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd.MM.yy");
 
     public Task(TaskType type, String name, String description, TaskStatus status) {
         this.type = type;

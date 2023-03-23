@@ -1,5 +1,7 @@
 import model.*;
 import service.FileBackedTasksManager;
+import service.Managers;
+import service.servers.HttpTaskServer;
 //import service.server.KVServer;
 
 import java.io.File;
@@ -14,7 +16,7 @@ public class Main {
         File file = new File("src" + File.separator + "main" + File.separator + "resources" + File.separator
                 + "task.csv");
 
-        FileBackedTasksManager tasksManagerTest = FileBackedTasksManager.loadFromFile(file);
+        FileBackedTasksManager tasksManagerTest = (FileBackedTasksManager) Managers.getDefault();
 
         Task task1 = new Task(TaskType.TASK, "Задача 1", "Описание Задача 1",
                 TaskStatus.NEW, 15,
@@ -70,5 +72,8 @@ public class Main {
         System.out.println(tasksManagerFBTest.getAllSubTaskForEpic(epicId2));
         System.out.println(tasksManagerFBTest.getEpic(epicId1).getEndTime());
         System.out.println(tasksManagerFBTest.getEpic(epicId2).getEndTime());
+
+        HttpTaskServer server = new HttpTaskServer(tasksManagerFBTest);
+        server.runServer();
     }
 }

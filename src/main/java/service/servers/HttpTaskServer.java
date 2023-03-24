@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import model.Task;
-import service.Managers;
 import service.TaskManager;
 import service.adapters.LocalDateAdapter;
 import service.exception.HttpTaskServerException;
@@ -17,7 +16,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static service.ServerLogsUtils.sendServerMassage;
+
 
 public class HttpTaskServer {
     HttpServer server;
@@ -31,7 +31,6 @@ public class HttpTaskServer {
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateAdapter());
         gson = gsonBuilder.create();
         this.fileTaskManager = tm;
-
         server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
         server.createContext("/tasks", this::handler);
     }
@@ -47,8 +46,15 @@ public class HttpTaskServer {
             switch (path) {
                 case "task" -> handleTask(h);
                 default -> {
-                    System.out.println("Такой страницы не существует: " + h.getRequestURI());
-                    h.sendResponseHeaders(404,0);
+                    String mError = "Запрашиваемый адрес <b>" + h.getRequestURI() + "</b> не существует. "
+                        + "Доступные страницы: <ul>"
+                        + "<a href=\"\\tasks\\\"><li>Priority Tasks</a></li>"
+                        + "<a href=\"\\tasks\\task\"><li>ALL Tasks</a></li>"
+                        + "<a href=\"\\tasks\\subtask\"><li>ALL Subtasks</a></li>"
+                        + "<a href=\"\\tasks\\epic\"><li>ALL Epic</a></li>"
+                        + "<a href=\"\\tasks\\history\"><li>History</a></li>"
+                        + "</ul>";
+                    sendResponse(h, mError, 404);
                 }
             }
         } catch (Exception e) {
@@ -64,15 +70,16 @@ public class HttpTaskServer {
                     final List<Task> tasks = fileTaskManager.getTasks();
                     final String response = gson.toJson(tasks);
                     System.out.println("Получены все простые задачи");
-                    sendText(h, response);
+                    sendResponse(h, response, 200);
                     return;
                 }
                 String idQuery = query.substring(3);
                 final int id = Integer.parseInt(idQuery);
                 final Task task = fileTaskManager.getTask(id);
                 final String response = gson.toJson(task);
+                sendServerMassage("*Получена задача с id=" + id);
                 System.out.println("Получена задача с id=" + id);
-                sendText(h,response);
+                sendResponse(h,response, 200);
             }
             default -> {
                 System.out.println("Что-то Вы темните, сударь: " + h.getRequestURI());
@@ -81,13 +88,16 @@ public class HttpTaskServer {
         }
     }
 
-    protected void sendText(HttpExchange h, String text) throws IOException {
+    protected void sendResponse(HttpExchange h, String text, int rCode) throws IOException {
         byte[] resp = text.getBytes(DEFAULT_CHARSET);
-        h.getResponseHeaders().add("Content-Type", "application/json");
-        h.sendResponseHeaders(200, resp.length);
+        if (rCode == 200) {
+            h.getResponseHeaders().add("Content-Type", "application/json");
+        } else {
+            h.getResponseHeaders().add("Content-Type", "text/html");
+        }
+        h.sendResponseHeaders(rCode, resp.length);
         h.getResponseBody().write(resp);
     }
-
 
 }
 

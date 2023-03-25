@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import model.Epic;
 import model.Subtask;
 import model.Task;
 import service.TaskManager;
@@ -48,26 +49,27 @@ public class HttpTaskServer {
             switch (path) {
                 case "" -> {
                     if (h.getRequestMethod().equals("GET")) {
-                        sendServerMassage("Клиент сделал запрос на получение приоритетных задач");
+                        sendServerMassage("Клиент сделал запрос на получение Приоритетных задач");
                         final TreeSet<Task> pTasks = fileTaskManager.getPrioritizedTasks();
                         final String response = gson.toJson(pTasks);
                         h.getResponseHeaders().add("X-TM-Method", "getPrioritizedTasks");
                         sendResponse(h, response, 200);
-                        sendServerMassage("Успешно обработан запрос на получение приоритетных задач");
+                        sendServerMassage("Успешно обработан запрос на получение Приоритетных задач");
                     } else {
                         handleError(h, "requestMethodG");
                     }
                 }
                 case "task" -> handleTask(h);
+                case "epic" -> handleEpic(h);
                 case "subtask" -> handleSubtask(h);
                 case "history" -> {
                     if (h.getRequestMethod().equals("GET")) {
-                        sendServerMassage("Клиент сделал запрос на получение истории просмотра задач");
+                        sendServerMassage("Клиент сделал запрос на получение Истории просмотра задач");
                         final List<Task> history = fileTaskManager.getHistory();
                         final String response = gson.toJson(history);
                         h.getResponseHeaders().add("X-TM-Method", "getHistory");
                         sendResponse(h, response, 200);
-                        sendServerMassage("Успешно обработан запрос на получение истории задач");
+                        sendServerMassage("Успешно обработан запрос на получение Истории просмотра задач");
                     } else {
                         handleError(h, "requestMethodG");
                     }
@@ -84,24 +86,24 @@ public class HttpTaskServer {
         switch (h.getRequestMethod()) {
             case "GET" -> {
                 if (query == null) {
-                    sendServerMassage("Клиент сделал запрос на получение всех задач");
+                    sendServerMassage("Клиент сделал запрос на получение всех Задач");
                     final List<Task> tasks = fileTaskManager.getTasks();
                     final String response = gson.toJson(tasks);
                     h.getResponseHeaders().add("X-TM-Method", "getTasks");
                     sendResponse(h, response, 200);
-                    sendServerMassage("Успешно обработан запрос на получение всех задач");
+                    sendServerMassage("Успешно обработан запрос на получение всех Задач");
                     return;
                 }
                 String idQuery = query.substring(3);
                 final int id = Integer.parseInt(idQuery);
-                sendServerMassage("*Клиент сделал запрос на получение задачи с ID=" + id);
+                sendServerMassage("*Клиент сделал запрос на получение Задачи с ID=" + id);
                 final Task task = fileTaskManager.getTask(id);
                 final String response = gson.toJson(task);
                 h.getResponseHeaders().add("X-TM-Method", "getTask");
                 sendResponse(h,response, 200);
 
                 if (!response.equals("null")) {
-                    sendServerMassage("Успешно обработан запрос на получение задачи с ID=" + id);
+                    sendServerMassage("Успешно обработан запрос на получение Задачи с ID=" + id);
                 } else {
                     sendServerMassage("*Задачи с ID=" + id + " не существует. Клиенту выдано значение NULL");
                 }
@@ -115,25 +117,55 @@ public class HttpTaskServer {
         switch (h.getRequestMethod()) {
             case "GET" -> {
                 if (query == null) {
-                    sendServerMassage("Клиент сделал запрос на получение всех подзадач");
+                    sendServerMassage("Клиент сделал запрос на получение всех Подзадач");
                     final List<Subtask> subtasks = fileTaskManager.getSubtasks();
                     final String response = gson.toJson(subtasks);
                     h.getResponseHeaders().add("X-TM-Method", "getSubtasks");
                     sendResponse(h, response, 200);
-                    sendServerMassage("Успешно обработан запрос на получение всех подзадач");
+                    sendServerMassage("Успешно обработан запрос на получение всех Подзадач");
                     return;
                 }
                 String idQuery = query.substring(3);
                 final int id = Integer.parseInt(idQuery);
-                sendServerMassage("*Клиент сделал запрос на получение подзадачи с ID=" + id);
+                sendServerMassage("*Клиент сделал запрос на получение Подзадачи с ID=" + id);
                 final Subtask subtask = fileTaskManager.getSubtask(id);
                 final String response = gson.toJson(subtask);
                 h.getResponseHeaders().add("X-TM-Method", "getSubtask");
                 sendResponse(h,response, 200);
                 if (!response.equals("null")) {
-                    sendServerMassage("Успешно обработан запрос на получение задачи с ID=" + id);
+                    sendServerMassage("Успешно обработан запрос на получение Подзадачи с ID=" + id);
                 } else {
                     sendServerMassage("*Подзадачи с ID=" + id + " не существует. Клиенту выдано значение NULL");
+                }
+            }
+            default -> handleError(h, "requestMethodGPD");
+        }
+    }
+
+    private void handleEpic(HttpExchange h) throws IOException {
+        final String query = h.getRequestURI().getQuery();
+        switch (h.getRequestMethod()) {
+            case "GET" -> {
+                if (query == null) {
+                    sendServerMassage("Клиент сделал запрос на получение всех Эпиков");
+                    final List<Epic> epics = fileTaskManager.getEpics();
+                    final String response = gson.toJson(epics);
+                    h.getResponseHeaders().add("X-TM-Method", "getEpics");
+                    sendResponse(h, response, 200);
+                    sendServerMassage("Успешно обработан запрос на получение всех Эпиков");
+                    return;
+                }
+                String idQuery = query.substring(3);
+                final int id = Integer.parseInt(idQuery);
+                sendServerMassage("*Клиент сделал запрос на получение Эпика с ID=" + id);
+                final Epic epic = fileTaskManager.getEpic(id);
+                final String response = gson.toJson(epic);
+                h.getResponseHeaders().add("X-TM-Method", "getEpic");
+                sendResponse(h,response, 200);
+                if (!response.equals("null")) {
+                    sendServerMassage("Успешно обработан запрос на получение Эпика с ID=" + id);
+                } else {
+                    sendServerMassage("*Эпика с ID=" + id + " не существует. Клиенту выдано значение NULL");
                 }
             }
             default -> handleError(h, "requestMethodGPD");

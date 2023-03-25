@@ -1,3 +1,3 @@
 # java-kanban
-Repository for homework project.
-Version 2.23
+Hello, this repository for homework project.
+Version 3.05

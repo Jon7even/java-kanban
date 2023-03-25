@@ -50,6 +50,7 @@ public class HttpTaskServer {
                         sendServerMassage("Клиент сделал запрос на получение приоритетных задач");
                         final TreeSet<Task> pTasks = fileTaskManager.getPrioritizedTasks();
                         final String response = gson.toJson(pTasks);
+                        h.getResponseHeaders().add("X-TM-Method", "getPrioritizedTasks");
                         sendResponse(h, response, 200);
                         sendServerMassage("Успешно обработан запрос на получение приоритетных задач");
                     } else {
@@ -57,6 +58,18 @@ public class HttpTaskServer {
                     }
                 }
                 case "task" -> handleTask(h);
+                case "history" -> {
+                    if (h.getRequestMethod().equals("GET")) {
+                        sendServerMassage("Клиент сделал запрос на получение истории просмотра задач");
+                        final List<Task> history = fileTaskManager.getHistory();
+                        final String response = gson.toJson(history);
+                        h.getResponseHeaders().add("X-TM-Method", "getHistory");
+                        sendResponse(h, response, 200);
+                        sendServerMassage("Успешно обработан запрос на получение истории задач");
+                    } else {
+                        handleError(h, "requestMethodG");
+                    }
+                }
                 default -> handleError(h, "endpoint");
             }
         } catch (Exception e) {
@@ -72,6 +85,7 @@ public class HttpTaskServer {
                     sendServerMassage("Клиент сделал запрос на получение всех задач");
                     final List<Task> tasks = fileTaskManager.getTasks();
                     final String response = gson.toJson(tasks);
+                    h.getResponseHeaders().add("X-TM-Method", "getTasks");
                     sendResponse(h, response, 200);
                     sendServerMassage("Успешно обработан запрос на получение всех задач");
                     return;
@@ -83,6 +97,7 @@ public class HttpTaskServer {
                 final String response = gson.toJson(task);
                 sendServerMassage("*Получена задача с id=" + id);
                 System.out.println("Получена задача с id=" + id);
+                h.getResponseHeaders().add("X-TM-Method", "getTask");
                 sendResponse(h,response, 200);
                 sendServerMassage("Успешно обработан запрос на получение задачи с ID=" + id);
             }

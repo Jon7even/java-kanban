@@ -62,6 +62,28 @@ public class HttpTaskServer {
                 case "task" -> handleTask(h);
                 case "epic" -> handleEpic(h);
                 case "subtask" -> handleSubtask(h);
+                case "subtask/epic" -> {
+                    if (h.getRequestMethod().equals("GET")) {
+                        String idQuery = h.getRequestURI().getQuery().substring(3);
+                        final int id = Integer.parseInt(idQuery);
+                        sendServerMassage("*Клиент сделал запрос на получение всех Подзадач у Эпика с ID=" + id);
+                        final List<Subtask> allSubtasksEpic = fileTaskManager.getAllSubTaskForEpic(id);
+                        final String response = gson.toJson(allSubtasksEpic);
+                        h.getResponseHeaders().add("X-TM-Method", "getAllSubTaskForEpic");
+                        sendResponse(h,response, 200);
+                        if (response.equals("[]")) {
+                            sendServerMassage("*Запрос на получение Подзадач у Эпика с ID=" + id + " обработан, "
+                                + "но вернулся пустой список");
+                        } else if (response.equals("null")) {
+                            sendServerMassage("*При получении Подзадач у Эпика с ID=" + id + " клиенту вернулось "
+                                + "значение null");
+                        } else {
+                            sendServerMassage("Успешно обработан запрос на получение Подзадач у Эпика с ID=" + id);
+                        }
+                    } else {
+                        handleError(h, "requestMethodG");
+                    }
+                }
                 case "history" -> {
                     if (h.getRequestMethod().equals("GET")) {
                         sendServerMassage("Клиент сделал запрос на получение Истории просмотра задач");

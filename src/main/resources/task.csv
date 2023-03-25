@@ -6,4 +6,4 @@ id,type,name,status,description,epic,duration,startTime
 5,SUBTASK,1 Подзадача к эпику 1,DONE,Описание Подзадачи 1,15,04:03 01.01.23,3,
 6,SUBTASK,2 Подзадача к эпику 1,IN_PROGRESS,Описание Подзадачи 2,15,01:32 01.01.23,3,
  
-2,6,3,4,
+2,6,

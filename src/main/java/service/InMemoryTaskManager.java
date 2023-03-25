@@ -89,6 +89,16 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
+    public List<Task> getHistory() {
+        return historyManager.getHistory();
+    }
+
+    @Override
+    public TreeSet<Task> getPrioritizedTasks() {
+        return prioritizedTasks;
+    }
+
+    @Override
     public List<Subtask> getAllSubTaskForEpic(int id) {
         Epic epic = epicTasks.get(id);
         if (epic == null || epic.getRelationSubtaskId().size() == 0) {
@@ -237,15 +247,6 @@ public class InMemoryTaskManager implements TaskManager {
             historyManager.removeHistoryTask(id);
             updateEpicTime(epic);
         }
-    }
-
-    @Override
-    public List<Task> getHistory() {
-        return historyManager.getHistory();
-    }
-
-    public TreeSet<Task> getPrioritizedTasks() {
-        return prioritizedTasks;
     }
 
     private Boolean isConflictTimeIntersection(LocalDateTime timeStart, LocalDateTime timeEnd) {

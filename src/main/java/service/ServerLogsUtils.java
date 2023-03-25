@@ -21,6 +21,8 @@ public class ServerLogsUtils {
         if (sm.contains("*")) {
             sb.append(sm.substring(1));
             saveLogs(sb.toString());
+        } else {
+            sb.append(sm);
         }
         sb.insert(0, "| Time: ");
         System.out.println(sb);

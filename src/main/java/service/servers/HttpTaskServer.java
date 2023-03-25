@@ -15,9 +15,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.TreeSet;
 
 import static service.ServerLogsUtils.sendServerMassage;
-
+import static service.adapters.LocalDateAdapter.DATE_TIME_FORMATTER;
 
 public class HttpTaskServer {
     HttpServer server;
@@ -37,7 +38,7 @@ public class HttpTaskServer {
 
     public void runServer() {
         server.start();
-        System.out.println("Сервер запущен на порту " + PORT);
+        sendServerMassage("HttpTaskServer запущен и прослушивает порт " + PORT);
     }
 
     private void handler(HttpExchange h){
@@ -46,7 +47,8 @@ public class HttpTaskServer {
             switch (path) {
                 case "task" -> handleTask(h);
                 default -> {
-                    String mError = "Запрашиваемый адрес <b>" + h.getRequestURI() + "</b> не существует. "
+                    String mError = "Запрашиваемый адрес <b>" + "http://localhost:" + PORT + h.getRequestURI()
+                            + "</b> не существует. "
                         + "Доступные страницы: <ul>"
                         + "<a href=\"\\tasks\\\"><li>Priority Tasks</a></li>"
                         + "<a href=\"\\tasks\\task\"><li>ALL Tasks</a></li>"
@@ -54,6 +56,7 @@ public class HttpTaskServer {
                         + "<a href=\"\\tasks\\epic\"><li>ALL Epic</a></li>"
                         + "<a href=\"\\tasks\\history\"><li>History</a></li>"
                         + "</ul>";
+                    sendServerMassage("*Клиент пытался зайти на несуществующую страницу: " + h.getRequestURI());
                     sendResponse(h, mError, 404);
                 }
             }
@@ -67,33 +70,46 @@ public class HttpTaskServer {
         switch (h.getRequestMethod()) {
             case "GET" -> {
                 if (query == null) {
+                    sendServerMassage("Клиент сделал запрос на получение всех задач");
                     final List<Task> tasks = fileTaskManager.getTasks();
                     final String response = gson.toJson(tasks);
-                    System.out.println("Получены все простые задачи");
                     sendResponse(h, response, 200);
+                    sendServerMassage("Успешно обработан запрос на получение всех задач");
                     return;
                 }
                 String idQuery = query.substring(3);
                 final int id = Integer.parseInt(idQuery);
+                sendServerMassage("Клиент сделал запрос на получение задачи с ID=" + id);
                 final Task task = fileTaskManager.getTask(id);
                 final String response = gson.toJson(task);
                 sendServerMassage("*Получена задача с id=" + id);
                 System.out.println("Получена задача с id=" + id);
                 sendResponse(h,response, 200);
+                sendServerMassage("Успешно обработан запрос на получение задачи с ID=" + id);
             }
             default -> {
-                System.out.println("Что-то Вы темните, сударь: " + h.getRequestURI());
-                h.sendResponseHeaders(404,0);
+                String mError = "Приложение <b>Task Manager</b> на текущий момент не поддерживает метод - <b>"
+                        + h.getRequestMethod() + "</b> <br />"
+                        + "Доступные методы: <ul>"
+                        + "<li><b>GET</b></li>"
+                        + "<li><b>POST</b></li>"
+                        + "<li><b>DELETE</b></li>"
+                        + "</ul>";
+                sendServerMassage("*Клиент пытался использовать необработанный метод " + h.getRequestMethod()
+                    + " на странице: " + h.getRequestURI());
+                sendResponse(h, mError, 404);
             }
         }
     }
 
     protected void sendResponse(HttpExchange h, String text, int rCode) throws IOException {
         byte[] resp = text.getBytes(DEFAULT_CHARSET);
+        h.getResponseHeaders().add("Date", LocalDateTime.now().format(DATE_TIME_FORMATTER));
+        h.getResponseHeaders().add("Server", "Java Localhost");
         if (rCode == 200) {
             h.getResponseHeaders().add("Content-Type", "application/json");
         } else {
-            h.getResponseHeaders().add("Content-Type", "text/html");
+            h.getResponseHeaders().add("Content-Type", "text/html; charset=" + DEFAULT_CHARSET);
         }
         h.sendResponseHeaders(rCode, resp.length);
         h.getResponseBody().write(resp);

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import model.Subtask;
 import model.Task;
 import service.TaskManager;
 import service.adapters.LocalDateAdapter;
@@ -58,6 +59,7 @@ public class HttpTaskServer {
                     }
                 }
                 case "task" -> handleTask(h);
+                case "subtask" -> handleSubtask(h);
                 case "history" -> {
                     if (h.getRequestMethod().equals("GET")) {
                         sendServerMassage("Клиент сделал запрос на получение истории просмотра задач");
@@ -92,14 +94,47 @@ public class HttpTaskServer {
                 }
                 String idQuery = query.substring(3);
                 final int id = Integer.parseInt(idQuery);
-                sendServerMassage("Клиент сделал запрос на получение задачи с ID=" + id);
+                sendServerMassage("*Клиент сделал запрос на получение задачи с ID=" + id);
                 final Task task = fileTaskManager.getTask(id);
                 final String response = gson.toJson(task);
-                sendServerMassage("*Получена задача с id=" + id);
-                System.out.println("Получена задача с id=" + id);
                 h.getResponseHeaders().add("X-TM-Method", "getTask");
                 sendResponse(h,response, 200);
-                sendServerMassage("Успешно обработан запрос на получение задачи с ID=" + id);
+
+                if (!response.equals("null")) {
+                    sendServerMassage("Успешно обработан запрос на получение задачи с ID=" + id);
+                } else {
+                    sendServerMassage("*Задачи с ID=" + id + " не существует. Клиенту выдано значение NULL");
+                }
+            }
+            default -> handleError(h, "requestMethodGPD");
+        }
+    }
+
+    private void handleSubtask(HttpExchange h) throws IOException {
+        final String query = h.getRequestURI().getQuery();
+        switch (h.getRequestMethod()) {
+            case "GET" -> {
+                if (query == null) {
+                    sendServerMassage("Клиент сделал запрос на получение всех подзадач");
+                    final List<Subtask> subtasks = fileTaskManager.getSubtasks();
+                    final String response = gson.toJson(subtasks);
+                    h.getResponseHeaders().add("X-TM-Method", "getSubtasks");
+                    sendResponse(h, response, 200);
+                    sendServerMassage("Успешно обработан запрос на получение всех подзадач");
+                    return;
+                }
+                String idQuery = query.substring(3);
+                final int id = Integer.parseInt(idQuery);
+                sendServerMassage("*Клиент сделал запрос на получение подзадачи с ID=" + id);
+                final Subtask subtask = fileTaskManager.getSubtask(id);
+                final String response = gson.toJson(subtask);
+                h.getResponseHeaders().add("X-TM-Method", "getSubtask");
+                sendResponse(h,response, 200);
+                if (!response.equals("null")) {
+                    sendServerMassage("Успешно обработан запрос на получение задачи с ID=" + id);
+                } else {
+                    sendServerMassage("*Подзадачи с ID=" + id + " не существует. Клиенту выдано значение NULL");
+                }
             }
             default -> handleError(h, "requestMethodGPD");
         }

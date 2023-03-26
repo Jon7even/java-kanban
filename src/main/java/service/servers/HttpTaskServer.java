@@ -6,9 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-import model.Epic;
-import model.Subtask;
-import model.Task;
+import model.*;
 import service.TaskManager;
 import service.adapters.LocalDateAdapter;
 
@@ -17,6 +15,7 @@ import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeSet;
@@ -138,9 +137,16 @@ public class HttpTaskServer {
                         + h.getRequestURI());
                 Optional<JsonElement> jsonElement = getJsonFromRequest(h);
                 if (jsonElement.isPresent()) {
-                    System.out.println(jsonElement);
+                    final Task oldTask;
                     final Task task = gson.fromJson(jsonElement.get(), Task.class);
                     final int idTask = task.getId();
+
+                    if (!isValidCheckingFields(task)) {
+                        sendServerMassage("*При попытке добавить/обновить Задачу с номером ID=" + idTask
+                                + " у клиента произошла ошибка: какое-то из полей имеет недопустимое значение!");
+                        handleError(h, "validCheckingFields", 400);
+                        return;
+                    }
 
                     if (idTask == 0) {
                         int newId = fileTaskManager.addNewTask(task);
@@ -149,9 +155,12 @@ public class HttpTaskServer {
                                 + fileTaskManager.getTask(newId).toString());
                         sendResponse(h, "Добавлена новая Задача", 201);
                     } else {
+                        oldTask = fileTaskManager.getTask(idTask);
                         fileTaskManager.updateTask(task);
                         h.getResponseHeaders().add("X-TM-Method", "updateTask");
                         sendServerMassage("*В ТМ на сервере клиент обновил Задачу ID=" + idTask);
+                        sendServerMassage("*Старая версия Задачи: " + oldTask);
+                        sendServerMassage("*Новая версия Задачи: " + task);
                         sendResponse(h, "Задача с ID=" + idTask + " обновлена", 200);
                     }
                 } else {
@@ -160,16 +169,6 @@ public class HttpTaskServer {
             }
             default -> handleError(h, "requestMethodGPD", 404);
         }
-    }
-
-    private Optional<JsonElement> getJsonFromRequest(HttpExchange h) throws IOException {
-        List<String> acceptJson = h.getRequestHeaders().get("Accept");
-        String body = new String(h.getRequestBody().readAllBytes(), DEFAULT_CHARSET);
-        JsonElement jsonElement = JsonParser.parseString(body);
-        if ((acceptJson != null) && acceptJson.contains("application/json") && jsonElement.isJsonObject()) {
-            return Optional.of(jsonElement);
-        }
-        return Optional.empty();
     }
 
     private void handleSubtask(HttpExchange h) throws IOException {
@@ -196,6 +195,46 @@ public class HttpTaskServer {
                     sendServerMassage("Успешно обработан запрос на получение Подзадачи с ID=" + id);
                 } else {
                     sendServerMassage("*Подзадачи с ID=" + id + " не существует. Клиенту выдано значение NULL");
+                }
+            }
+            case "POST" -> {
+                sendServerMassage("*Клиент сделал запрос на создание/обновление Подзадачи на странице: "
+                        + h.getRequestURI());
+                Optional<JsonElement> jsonElement = getJsonFromRequest(h);
+                if (jsonElement.isPresent()) {
+                    final Subtask oldSubtask;
+                    final Subtask subtask = gson.fromJson(jsonElement.get(), Subtask.class);
+                    final int idSubtask = subtask.getId();
+
+                    if (!isValidCheckingFields(subtask)) {
+                        sendServerMassage("*При попытке добавить/обновить Подзадачу с номером ID=" + idSubtask
+                                + " у клиента произошла ошибка: какое-то из полей имеет недопустимое значение!");
+                        handleError(h, "validCheckingFields", 400);
+                        return;
+                    }
+
+                    if (idSubtask == 0) {
+                        int newId = fileTaskManager.addNewSubtask(subtask);
+                        h.getResponseHeaders().add("X-TM-Method", "addNewSubtask");
+                        if (newId == -1) {
+                            sendServerMassage("*При попытке добавить Подзадачу с номером ID=" + idSubtask
+                                    + " у клиента произошла ошибка: такого Эпика не существует");
+                            handleError(h, "subtaskNotFoundEpic", 400);
+                        }
+                        sendServerMassage("*В ТМ на сервере успешно создана новая Подзадача: "
+                                + fileTaskManager.getTask(newId).toString());
+                        sendResponse(h, "Добавлена новая Подзадача", 201);
+                    } else {
+                        oldSubtask = fileTaskManager.getSubtask(idSubtask);
+                        fileTaskManager.updateSubtask(subtask);
+                        h.getResponseHeaders().add("X-TM-Method", "updateSubtask");
+                        sendServerMassage("*В ТМ на сервере клиент обновил Подзадачу ID=" + idSubtask);
+                        sendServerMassage("*Старая версия Подзадачи: " + oldSubtask);
+                        sendServerMassage("*Новая версия Подзадачи: " + subtask);
+                        sendResponse(h, "Подзадача с ID=" + idSubtask + " обновлена", 200);
+                    }
+                } else {
+                    handleError(h, "badRequest", 400);
                 }
             }
             default -> handleError(h, "requestMethodGPD", 404);
@@ -232,6 +271,29 @@ public class HttpTaskServer {
         }
     }
 
+    private Optional<JsonElement> getJsonFromRequest(HttpExchange h) throws IOException {
+        List<String> acceptJson = h.getRequestHeaders().get("Accept");
+        String body = new String(h.getRequestBody().readAllBytes(), DEFAULT_CHARSET);
+        JsonElement jsonElement = JsonParser.parseString(body);
+        if ((acceptJson != null) && acceptJson.contains("application/json") && jsonElement.isJsonObject()) {
+            return Optional.of(jsonElement);
+        }
+        return Optional.empty();
+    }
+
+    protected void sendResponse(HttpExchange h, String text, int rCode) throws IOException {
+        byte[] resp = text.getBytes(DEFAULT_CHARSET);
+        h.getResponseHeaders().add("Date", LocalDateTime.now().format(DATE_TIME_FORMATTER));
+        h.getResponseHeaders().add("Server", "Java Localhost");
+        if (rCode == 200) {
+            h.getResponseHeaders().add("Content-Type", "application/json");
+        } else {
+            h.getResponseHeaders().add("Content-Type", "text/html; charset=" + DEFAULT_CHARSET);
+        }
+        h.sendResponseHeaders(rCode, resp.length);
+        h.getResponseBody().write(resp);
+    }
+
     private void handleError(HttpExchange h, String method, int rCode) throws IOException {
         String mError = "";
         switch (method) {
@@ -255,7 +317,6 @@ public class HttpTaskServer {
                 sendServerMassage("*Клиент пытался использовать необработанный метод " + h.getRequestMethod()
                         + " на странице: " + h.getRequestURI());
             }
-
             case "endpoint" -> {
                 mError = "Запрашиваемый адрес <b>" + "http://localhost:" + PORT + h.getRequestURI()
                         + "</b> не существует. "
@@ -278,6 +339,24 @@ public class HttpTaskServer {
                 sendServerMassage("*Клиент в Body или Header попытался передать вместо Json другие данные или "
                         + "null URI: " + h.getRequestURI());
             }
+            case "subtaskNotFoundEpic" -> {
+                mError = "Произошла ошибка при добавлении/обновлении Подзадачи."
+                        + "Возможные причины: <ul>"
+                        + "<li><b>Указан ID несуществующего Эпика</b></li>"
+                        + "<li><b>Во время обновления/добавления, Эпик существовал, но вы с другого устройства "
+                        + "уже удалили Эпик с таким ID.</b></li>"
+                        + "</ul> <b>Попробуйте создать Эпик с таким ID, а потом заново добавить/обновить эту Задачу</b";
+                sendServerMassage("*Клиент пытался добавить/обновить Подзадачу с несуществующим ID Эпика");
+            }
+            case "validCheckingFields" -> {
+                mError = "Произошла ошибка при добавлении/обновлении Задачи/Подзадачи/Эпика."
+                        + " Возможные причины: <ul>"
+                        + "<li><b>Использованы недопустимые данные в полях Модели Задач</b></li>"
+                        + "<li><b>Какое-то поле указано null </b></li>"
+                        + "</ul> <b>Попробуйте найти ошибку в полях Задачи и отправить запрос еще раз.</b";
+                sendServerMassage("*Клиент пытался добавить/обновить Задачу/Подзадачу/Эпик "
+                        + "с недопустимыми данными в полях Модели Задач");
+            }
             default -> {
                 mError = "Произошла непредсказуемая ошибка. Свяжитесь пожалуйста с администратором сервера";
                 sendServerMassage("*Произошла неизвестная ошибка: " + h.getRequestURI());
@@ -286,38 +365,13 @@ public class HttpTaskServer {
         sendResponse(h, mError, rCode);
     }
 
-    protected void sendResponse(HttpExchange h, String text, int rCode) throws IOException {
-        byte[] resp = text.getBytes(DEFAULT_CHARSET);
-        h.getResponseHeaders().add("Date", LocalDateTime.now().format(DATE_TIME_FORMATTER));
-        h.getResponseHeaders().add("Server", "Java Localhost");
-        if (rCode == 200) {
-            h.getResponseHeaders().add("Content-Type", "application/json");
-        } else {
-            h.getResponseHeaders().add("Content-Type", "text/html; charset=" + DEFAULT_CHARSET);
-        }
-        h.sendResponseHeaders(rCode, resp.length);
-        h.getResponseBody().write(resp);
+    private Boolean isValidCheckingFields(Task task) {
+        boolean isTaskHaveType = Arrays.stream(TaskType.values()).anyMatch(taskType -> taskType == task.getType());
+        boolean isTaskHaveStatus = Arrays.stream(TaskStatus.values())
+                .anyMatch(taskStatus -> taskStatus == task.getStatus());
+        boolean isHaveName = !task.getName().isEmpty();
+        boolean isHaveDescription = !task.getDescription().isEmpty();
+        return isTaskHaveType && isTaskHaveStatus && isHaveName && isHaveDescription;
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

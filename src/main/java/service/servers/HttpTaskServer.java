@@ -141,7 +141,7 @@ public class HttpTaskServer {
                     final Task task = gson.fromJson(jsonElement.get(), Task.class);
                     final int idTask = task.getId();
 
-                    if (!isValidCheckingFields(task)) {
+                    if (!isValidCheckingFields(task, TaskType.TASK)) {
                         sendServerMassage("*При попытке добавить/обновить Задачу с номером ID=" + idTask
                                 + " у клиента произошла ошибка: какое-то из полей имеет недопустимое значение!");
                         handleError(h, "validCheckingFields", 400);
@@ -206,7 +206,7 @@ public class HttpTaskServer {
                     final Subtask subtask = gson.fromJson(jsonElement.get(), Subtask.class);
                     final int idSubtask = subtask.getId();
 
-                    if (!isValidCheckingFields(subtask)) {
+                    if (!isValidCheckingFields(subtask, TaskType.SUBTASK)) {
                         sendServerMassage("*При попытке добавить/обновить Подзадачу с номером ID=" + idSubtask
                                 + " у клиента произошла ошибка: какое-то из полей имеет недопустимое значение!");
                         handleError(h, "validCheckingFields", 400);
@@ -265,6 +265,41 @@ public class HttpTaskServer {
                     sendServerMassage("Успешно обработан запрос на получение Эпика с ID=" + id);
                 } else {
                     sendServerMassage("*Эпика с ID=" + id + " не существует. Клиенту выдано значение NULL");
+                }
+            }
+            case "POST" -> {
+                sendServerMassage("*Клиент сделал запрос на создание/обновление Эпика на странице: "
+                        + h.getRequestURI());
+                Optional<JsonElement> jsonElement = getJsonFromRequest(h);
+                if (jsonElement.isPresent()) {
+                    final Epic oldEpic;
+                    final Epic epic = gson.fromJson(jsonElement.get(), Epic.class);
+                    final int idEpic = epic.getId();
+
+                    if (!isValidCheckingFields(epic, TaskType.EPIC)) {
+                        sendServerMassage("*При попытке добавить/обновить Эпик с номером ID=" + idEpic
+                                + " у клиента произошла ошибка: какое-то из полей имеет недопустимое значение!");
+                        handleError(h, "validCheckingFields", 400);
+                        return;
+                    }
+
+                    if (idEpic == 0) {
+                        int newId = fileTaskManager.addNewEpic(epic);
+                        h.getResponseHeaders().add("X-TM-Method", "addNewEpic");
+                        sendServerMassage("*В ТМ на сервере успешно создан новый Эпик: "
+                                + fileTaskManager.getEpic(newId).toString());
+                        sendResponse(h, "Добавлен новый Эпик", 201);
+                    } else {
+                        oldEpic = fileTaskManager.getEpic(idEpic);
+                        fileTaskManager.updateEpic(epic);
+                        h.getResponseHeaders().add("X-TM-Method", "updateEpic");
+                        sendServerMassage("*В ТМ на сервере клиент обновил Эпик ID=" + idEpic);
+                        sendServerMassage("*Старая версия Эпика: " + oldEpic);
+                        sendServerMassage("*Новая версия Эпик: " + epic);
+                        sendResponse(h, "Задача с ID=" + idEpic + " обновлена", 200);
+                    }
+                } else {
+                    handleError(h, "badRequest", 400);
                 }
             }
             default -> handleError(h, "endpoint", 404);
@@ -365,13 +400,14 @@ public class HttpTaskServer {
         sendResponse(h, mError, rCode);
     }
 
-    private Boolean isValidCheckingFields(Task task) {
+    private Boolean isValidCheckingFields(Task task, TaskType taskTypeValid) {
+        boolean isTaskTypeIsValid = task.getType() == taskTypeValid;
         boolean isTaskHaveType = Arrays.stream(TaskType.values()).anyMatch(taskType -> taskType == task.getType());
         boolean isTaskHaveStatus = Arrays.stream(TaskStatus.values())
                 .anyMatch(taskStatus -> taskStatus == task.getStatus());
         boolean isHaveName = !task.getName().isEmpty();
         boolean isHaveDescription = !task.getDescription().isEmpty();
-        return isTaskHaveType && isTaskHaveStatus && isHaveName && isHaveDescription;
+        return isTaskTypeIsValid && isTaskHaveType && isTaskHaveStatus && isHaveName && isHaveDescription;
     }
 
 }

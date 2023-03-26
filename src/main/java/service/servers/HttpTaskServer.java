@@ -2,6 +2,8 @@ package service.servers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import model.Epic;
@@ -9,7 +11,6 @@ import model.Subtask;
 import model.Task;
 import service.TaskManager;
 import service.adapters.LocalDateAdapter;
-import service.exception.HttpTaskServerException;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -17,6 +18,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.TreeSet;
 
 import static service.ServerLogsUtils.sendServerMassage;
@@ -29,7 +31,7 @@ public class HttpTaskServer {
     private final Gson gson;
     private final TaskManager fileTaskManager;
 
-    public HttpTaskServer(TaskManager tm) throws IOException{
+    public HttpTaskServer(TaskManager tm) throws IOException {
         GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting().serializeNulls()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateAdapter());
         gson = gsonBuilder.create();
@@ -43,8 +45,8 @@ public class HttpTaskServer {
         sendServerMassage("HttpTaskServer запущен и прослушивает порт " + PORT);
     }
 
-    private void handler(HttpExchange h){
-        try (h){
+    private void handler(HttpExchange h) {
+        try (h) {
             final String path = h.getRequestURI().getPath().substring(7);
             switch (path) {
                 case "" -> {
@@ -56,7 +58,7 @@ public class HttpTaskServer {
                         sendResponse(h, response, 200);
                         sendServerMassage("Успешно обработан запрос на получение Приоритетных задач");
                     } else {
-                        handleError(h, "requestMethodG");
+                        handleError(h, "requestMethodG", 404);
                     }
                 }
                 case "task" -> handleTask(h);
@@ -70,18 +72,18 @@ public class HttpTaskServer {
                         final List<Subtask> allSubtasksEpic = fileTaskManager.getAllSubTaskForEpic(id);
                         final String response = gson.toJson(allSubtasksEpic);
                         h.getResponseHeaders().add("X-TM-Method", "getAllSubTaskForEpic");
-                        sendResponse(h,response, 200);
+                        sendResponse(h, response, 200);
                         if (response.equals("[]")) {
                             sendServerMassage("*Запрос на получение Подзадач у Эпика с ID=" + id + " обработан, "
-                                + "но вернулся пустой список");
+                                    + "но вернулся пустой список");
                         } else if (response.equals("null")) {
                             sendServerMassage("*При получении Подзадач у Эпика с ID=" + id + " клиенту вернулось "
-                                + "значение null");
+                                    + "значение null");
                         } else {
                             sendServerMassage("Успешно обработан запрос на получение Подзадач у Эпика с ID=" + id);
                         }
                     } else {
-                        handleError(h, "requestMethodG");
+                        handleError(h, "requestMethodG", 404);
                     }
                 }
                 case "history" -> {
@@ -93,13 +95,14 @@ public class HttpTaskServer {
                         sendResponse(h, response, 200);
                         sendServerMassage("Успешно обработан запрос на получение Истории просмотра задач");
                     } else {
-                        handleError(h, "requestMethodG");
+                        handleError(h, "requestMethodG", 404);
                     }
                 }
-                default -> handleError(h, "endpoint");
+                default -> handleError(h, "endpoint", 404);
             }
-        } catch (Exception e) {
-            throw new HttpTaskServerException("Error: ", e);
+        } catch (IOException e) {
+            sendServerMassage(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -122,7 +125,7 @@ public class HttpTaskServer {
                 final Task task = fileTaskManager.getTask(id);
                 final String response = gson.toJson(task);
                 h.getResponseHeaders().add("X-TM-Method", "getTask");
-                sendResponse(h,response, 200);
+                sendResponse(h, response, 200);
 
                 if (!response.equals("null")) {
                     sendServerMassage("Успешно обработан запрос на получение Задачи с ID=" + id);
@@ -130,8 +133,43 @@ public class HttpTaskServer {
                     sendServerMassage("*Задачи с ID=" + id + " не существует. Клиенту выдано значение NULL");
                 }
             }
-            default -> handleError(h, "requestMethodGPD");
+            case "POST" -> {
+                sendServerMassage("*Клиент сделал запрос на создание/обновление Задачи на странице: "
+                        + h.getRequestURI());
+                Optional<JsonElement> jsonElement = getJsonFromRequest(h);
+                if (jsonElement.isPresent()) {
+                    System.out.println(jsonElement);
+                    final Task task = gson.fromJson(jsonElement.get(), Task.class);
+                    final int idTask = task.getId();
+
+                    if (idTask == 0) {
+                        int newId = fileTaskManager.addNewTask(task);
+                        h.getResponseHeaders().add("X-TM-Method", "addNewTask");
+                        sendServerMassage("*В ТМ на сервере успешно создана новая Задача: "
+                                + fileTaskManager.getTask(newId).toString());
+                        sendResponse(h, "Добавлена новая Задача", 201);
+                    } else {
+                        fileTaskManager.updateTask(task);
+                        h.getResponseHeaders().add("X-TM-Method", "updateTask");
+                        sendServerMassage("*В ТМ на сервере клиент обновил Задачу ID=" + idTask);
+                        sendResponse(h, "Задача с ID=" + idTask + " обновлена", 200);
+                    }
+                } else {
+                    handleError(h, "badRequest", 400);
+                }
+            }
+            default -> handleError(h, "requestMethodGPD", 404);
         }
+    }
+
+    private Optional<JsonElement> getJsonFromRequest(HttpExchange h) throws IOException {
+        List<String> acceptJson = h.getRequestHeaders().get("Accept");
+        String body = new String(h.getRequestBody().readAllBytes(), DEFAULT_CHARSET);
+        JsonElement jsonElement = JsonParser.parseString(body);
+        if ((acceptJson != null) && acceptJson.contains("application/json") && jsonElement.isJsonObject()) {
+            return Optional.of(jsonElement);
+        }
+        return Optional.empty();
     }
 
     private void handleSubtask(HttpExchange h) throws IOException {
@@ -153,14 +191,14 @@ public class HttpTaskServer {
                 final Subtask subtask = fileTaskManager.getSubtask(id);
                 final String response = gson.toJson(subtask);
                 h.getResponseHeaders().add("X-TM-Method", "getSubtask");
-                sendResponse(h,response, 200);
+                sendResponse(h, response, 200);
                 if (!response.equals("null")) {
                     sendServerMassage("Успешно обработан запрос на получение Подзадачи с ID=" + id);
                 } else {
                     sendServerMassage("*Подзадачи с ID=" + id + " не существует. Клиенту выдано значение NULL");
                 }
             }
-            default -> handleError(h, "requestMethodGPD");
+            default -> handleError(h, "requestMethodGPD", 404);
         }
     }
 
@@ -183,18 +221,18 @@ public class HttpTaskServer {
                 final Epic epic = fileTaskManager.getEpic(id);
                 final String response = gson.toJson(epic);
                 h.getResponseHeaders().add("X-TM-Method", "getEpic");
-                sendResponse(h,response, 200);
+                sendResponse(h, response, 200);
                 if (!response.equals("null")) {
                     sendServerMassage("Успешно обработан запрос на получение Эпика с ID=" + id);
                 } else {
                     sendServerMassage("*Эпика с ID=" + id + " не существует. Клиенту выдано значение NULL");
                 }
             }
-            default -> handleError(h, "requestMethodGPD");
+            default -> handleError(h, "endpoint", 404);
         }
     }
 
-    private void handleError(HttpExchange h, String method) throws IOException {
+    private void handleError(HttpExchange h, String method, int rCode) throws IOException {
         String mError = "";
         switch (method) {
             case "requestMethodG" -> {
@@ -230,12 +268,22 @@ public class HttpTaskServer {
                         + "</ul>";
                 sendServerMassage("*Клиент пытался зайти на несуществующую страницу: " + h.getRequestURI());
             }
+            case "badRequest" -> {
+                mError = "Вы передаете неправильные данные для добавления/обновления Задач. "
+                        + "Возможные причины: <ul>"
+                        + "<li><b>В заголовок не передан \"Accept\", \"application/json\"</b></li>"
+                        + "<li><b>Передается пустое Body</b></li>"
+                        + "<li><b>Что-то передается, но это не Json объект</b></li>"
+                        + "</ul>";
+                sendServerMassage("*Клиент в Body или Header попытался передать вместо Json другие данные или "
+                        + "null URI: " + h.getRequestURI());
+            }
             default -> {
                 mError = "Произошла непредсказуемая ошибка. Свяжитесь пожалуйста с администратором сервера";
                 sendServerMassage("*Произошла неизвестная ошибка: " + h.getRequestURI());
             }
         }
-        sendResponse(h, mError, 404);
+        sendResponse(h, mError, rCode);
     }
 
     protected void sendResponse(HttpExchange h, String text, int rCode) throws IOException {

@@ -2,7 +2,8 @@ import model.*;
 import service.FileBackedTasksManager;
 import service.Managers;
 import service.servers.HttpTaskServer;
-//import service.server.KVServer;
+import service.servers.KVServer;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -10,9 +11,6 @@ import java.time.LocalDateTime;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        //new KVServer().start();
-
-
         File file = new File("src" + File.separator + "main" + File.separator + "resources" + File.separator
                 + "task.csv");
 
@@ -68,11 +66,8 @@ public class Main {
         System.out.println(tasksManagerFBTest.getSubtasks());
         System.out.println(tasksManagerFBTest.getHistory());
         System.out.println(tasksManagerFBTest.getPrioritizedTasks());
-        //System.out.println(tasksManagerFBTest.getAllSubTaskForEpic(epicId1));
-        //System.out.println(tasksManagerFBTest.getAllSubTaskForEpic(epicId2));
-        //System.out.println(tasksManagerFBTest.getEpic(epicId1).getEndTime());
-        //System.out.println(tasksManagerFBTest.getEpic(epicId2).getEndTime());
 
+        new KVServer().start();
         HttpTaskServer server = new HttpTaskServer(tasksManagerFBTest);
         server.runServer();
     }

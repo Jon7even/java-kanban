@@ -38,7 +38,7 @@ public class HttpTaskServer {
 
     public void runServer() {
         server.start();
-        sendServerMassage("HttpTaskServer запущен и прослушивает порт " + PORT);
+        sendServerMassage("HttpTaskServer запущен и прослушивает порт: " + PORT);
     }
 
     private void handler(HttpExchange h) {
@@ -100,7 +100,6 @@ public class HttpTaskServer {
                 default -> handleError(h, "endpoint", 404);
             }
         } catch (IOException e) {
-            sendServerMassage(e.getMessage());
             throw new RuntimeException(e);
         }
     }

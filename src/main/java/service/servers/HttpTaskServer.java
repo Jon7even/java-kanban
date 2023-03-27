@@ -1,44 +1,40 @@
 package service.servers;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import model.*;
+import service.Managers;
 import service.TaskManager;
-import service.adapters.LocalDateAdapter;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.TreeSet;
 
+import static cfg.config.*;
 import static service.ServerLogsUtils.sendServerMassage;
-import static service.adapters.LocalDateAdapter.DATE_TIME_FORMATTER;
 
 public class HttpTaskServer {
     HttpServer server;
-    private static final int PORT = 8080;
-    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     private final Gson gson;
-    private final TaskManager fileTaskManager;
+    private final TaskManager tm;
 
-    public HttpTaskServer(TaskManager tm) throws IOException {
-        GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting().serializeNulls()
-                .registerTypeAdapter(LocalDateTime.class, new LocalDateAdapter());
-        gson = gsonBuilder.create();
-        this.fileTaskManager = tm;
-        server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
+    public HttpTaskServer() throws IOException {
+        gson = GsonBuilderCreate();
+        this.tm = Managers.getDefault();
+        server = HttpServer.create(new InetSocketAddress(HOSTNAME, PORT_HTTP_TASKS), 0);
         server.createContext("/tasks", this::handler);
     }
 
     public void runServer() {
         server.start();
-        sendServerMassage("HttpTaskServer запущен и прослушивает порт: " + PORT);
+        sendServerMassage("HttpTaskServer запущен и прослушивает порт: " + PORT_HTTP_TASKS);
     }
 
     private void handler(HttpExchange h) {
@@ -49,7 +45,7 @@ public class HttpTaskServer {
                     if (h.getRequestMethod().equals("GET")) {
                         sendServerMassage("Клиент сделал запрос " + h.getRequestMethod()
                                 + " на получение Приоритетных задач");
-                        final TreeSet<Task> pTasks = fileTaskManager.getPrioritizedTasks();
+                        final TreeSet<Task> pTasks = tm.getPrioritizedTasks();
                         final String response = gson.toJson(pTasks);
                         h.getResponseHeaders().add("X-TM-Method", "getPrioritizedTasks");
                         sendResponse(h, response, 200);
@@ -67,7 +63,7 @@ public class HttpTaskServer {
                         final int id = Integer.parseInt(idQuery);
                         sendServerMassage("*Клиент сделал запрос " + h.getRequestMethod() + " на получение всех "
                                 + "Подзадач у Эпика с ID=" + id);
-                        final List<Subtask> allSubtasksEpic = fileTaskManager.getAllSubTaskForEpic(id);
+                        final List<Subtask> allSubtasksEpic = tm.getAllSubTaskForEpic(id);
                         final String response = gson.toJson(allSubtasksEpic);
                         h.getResponseHeaders().add("X-TM-Method", "getAllSubTaskForEpic");
                         sendResponse(h, response, 200);
@@ -88,7 +84,7 @@ public class HttpTaskServer {
                     if (h.getRequestMethod().equals("GET")) {
                         sendServerMassage("Клиент сделал запрос " + h.getRequestMethod()
                                 + " на получение Истории просмотра задач");
-                        final List<Task> history = fileTaskManager.getHistory();
+                        final List<Task> history = tm.getHistory();
                         final String response = gson.toJson(history);
                         h.getResponseHeaders().add("X-TM-Method", "getHistory");
                         sendResponse(h, response, 200);
@@ -110,7 +106,7 @@ public class HttpTaskServer {
             case "GET" -> {
                 if (query == null) {
                     sendServerMassage("Клиент сделал запрос " + h.getRequestMethod() + " на получение всех Задач");
-                    final List<Task> tasks = fileTaskManager.getTasks();
+                    final List<Task> tasks = tm.getTasks();
                     final String response = gson.toJson(tasks);
                     h.getResponseHeaders().add("X-TM-Method", "getTasks");
                     sendResponse(h, response, 200);
@@ -121,7 +117,7 @@ public class HttpTaskServer {
                 final int id = Integer.parseInt(idQuery);
                 sendServerMassage("*Клиент сделал запрос " + h.getRequestMethod()
                         + " на получение Задачи с ID=" + id);
-                final Task task = fileTaskManager.getTask(id);
+                final Task task = tm.getTask(id);
                 final String response = gson.toJson(task);
                 h.getResponseHeaders().add("X-TM-Method", "getTask");
                 sendResponse(h, response, 200);
@@ -149,14 +145,14 @@ public class HttpTaskServer {
                     }
 
                     if (idTask == 0) {
-                        int newId = fileTaskManager.addNewTask(task);
+                        int newId = tm.addNewTask(task);
                         h.getResponseHeaders().add("X-TM-Method", "addNewTask");
                         sendServerMassage("*В ТМ на сервере успешно создана новая Задача: "
-                                + fileTaskManager.getTask(newId).toString());
+                                + tm.getTask(newId).toString());
                         sendResponse(h, "Добавлена новая Задача", 201);
                     } else {
-                        oldTask = fileTaskManager.getTask(idTask);
-                        fileTaskManager.updateTask(task);
+                        oldTask = tm.getTask(idTask);
+                        tm.updateTask(task);
                         h.getResponseHeaders().add("X-TM-Method", "updateTask");
                         sendServerMassage("*В ТМ на сервере клиент обновил Задачу ID=" + idTask);
                         sendServerMassage("*Старая версия Задачи: " + oldTask);
@@ -170,13 +166,13 @@ public class HttpTaskServer {
             case "DELETE" -> {
                 if (query == null) {
                     sendServerMassage("*Клиент сделал запрос " + h.getRequestMethod() + " на удаление всех Задач");
-                    if (fileTaskManager.getTasks().isEmpty()) {
+                    if (tm.getTasks().isEmpty()) {
                         final String response = "Список Задач уже пуст. Повторить это действие невозможно";
                         sendResponse(h, response, 400);
                         sendServerMassage("*Клиент пытался удалить все Задачи, но список уже пуст");
                         return;
                     }
-                    fileTaskManager.deleteAllTasks();
+                    tm.deleteAllTasks();
                     final String response = "Вы удалили все Задачи";
                     h.getResponseHeaders().add("X-TM-Method", "deleteAllTasks");
                     sendResponse(h, response, 200);
@@ -187,13 +183,13 @@ public class HttpTaskServer {
                 final int id = Integer.parseInt(idQuery);
                 sendServerMassage("*Клиент сделал запрос " + h.getRequestMethod()
                         + " на удаление Задачи с ID=" + id);
-                if (fileTaskManager.getTask(id) == null) {
+                if (tm.getTask(id) == null) {
                     final String response = "Задачи с таким ID=" + id + " не существует.";
                     sendResponse(h, response, 400);
                     sendServerMassage("*Клиент пытался удалить Задачу с ID=" + id + " но ее не существует");
                     return;
                 }
-                fileTaskManager.removeTask(id);
+                tm.removeTask(id);
                 final String response = "Вы удалили Задачу с ID=" + id;
                 h.getResponseHeaders().add("X-TM-Method", "removeTask");
                 sendResponse(h, response, 200);
@@ -210,7 +206,7 @@ public class HttpTaskServer {
                 if (query == null) {
                     sendServerMassage("Клиент сделал запрос " + h.getRequestMethod()
                             + " на получение всех Подзадач");
-                    final List<Subtask> subtasks = fileTaskManager.getSubtasks();
+                    final List<Subtask> subtasks = tm.getSubtasks();
                     final String response = gson.toJson(subtasks);
                     h.getResponseHeaders().add("X-TM-Method", "getSubtasks");
                     sendResponse(h, response, 200);
@@ -221,7 +217,7 @@ public class HttpTaskServer {
                 final int id = Integer.parseInt(idQuery);
                 sendServerMassage("*Клиент сделал запрос " + h.getRequestMethod()
                         + " на получение Подзадачи с ID=" + id);
-                final Subtask subtask = fileTaskManager.getSubtask(id);
+                final Subtask subtask = tm.getSubtask(id);
                 final String response = gson.toJson(subtask);
                 h.getResponseHeaders().add("X-TM-Method", "getSubtask");
                 sendResponse(h, response, 200);
@@ -248,7 +244,7 @@ public class HttpTaskServer {
                     }
 
                     if (idSubtask == 0) {
-                        int newId = fileTaskManager.addNewSubtask(subtask);
+                        int newId = tm.addNewSubtask(subtask);
                         h.getResponseHeaders().add("X-TM-Method", "addNewSubtask");
                         if (newId == -1) {
                             sendServerMassage("*При попытке добавить Подзадачу с номером ID=" + idSubtask
@@ -256,11 +252,11 @@ public class HttpTaskServer {
                             handleError(h, "subtaskNotFoundEpic", 400);
                         }
                         sendServerMassage("*В ТМ на сервере успешно создана новая Подзадача: "
-                                + fileTaskManager.getTask(newId).toString());
+                                + tm.getTask(newId).toString());
                         sendResponse(h, "Добавлена новая Подзадача", 201);
                     } else {
-                        oldSubtask = fileTaskManager.getSubtask(idSubtask);
-                        fileTaskManager.updateSubtask(subtask);
+                        oldSubtask = tm.getSubtask(idSubtask);
+                        tm.updateSubtask(subtask);
                         h.getResponseHeaders().add("X-TM-Method", "updateSubtask");
                         sendServerMassage("*В ТМ на сервере клиент обновил Подзадачу ID=" + idSubtask);
                         sendServerMassage("*Старая версия Подзадачи: " + oldSubtask);
@@ -275,13 +271,13 @@ public class HttpTaskServer {
                 if (query == null) {
                     sendServerMassage("*Клиент сделал запрос "
                             + h.getRequestMethod() + " на удаление всех Подзадач");
-                    if (fileTaskManager.getSubtasks().isEmpty()) {
+                    if (tm.getSubtasks().isEmpty()) {
                         final String response = "Список Подзадач уже пуст. Повторить это действие невозможно";
                         sendResponse(h, response, 400);
                         sendServerMassage("*Клиент пытался удалить все Подзадачи, но список уже пуст");
                         return;
                     }
-                    fileTaskManager.deleteAllSubtasks();
+                    tm.deleteAllSubtasks();
                     final String response = "Вы удалили все Подзадачи";
                     h.getResponseHeaders().add("X-TM-Method", "deleteAllSubtasks");
                     sendResponse(h, response, 200);
@@ -292,13 +288,13 @@ public class HttpTaskServer {
                 final int id = Integer.parseInt(idQuery);
                 sendServerMassage("*Клиент сделал запрос " + h.getRequestMethod()
                         + " на удаление Подзадачи с ID=" + id);
-                if (fileTaskManager.getSubtask(id) == null) {
+                if (tm.getSubtask(id) == null) {
                     final String response = "Подзадачи с таким ID=" + id + " не существует.";
                     sendResponse(h, response, 400);
                     sendServerMassage("*Клиент пытался удалить Подзадачу с ID=" + id + " но ее не существует");
                     return;
                 }
-                fileTaskManager.removeSubtask(id);
+                tm.removeSubtask(id);
                 final String response = "Вы удалили Подзадачу с ID=" + id;
                 h.getResponseHeaders().add("X-TM-Method", "removeSubtask");
                 sendResponse(h, response, 200);
@@ -314,7 +310,7 @@ public class HttpTaskServer {
             case "GET" -> {
                 if (query == null) {
                     sendServerMassage("Клиент сделал " + h.getRequestMethod() + " запрос на получение всех Эпиков");
-                    final List<Epic> epics = fileTaskManager.getEpics();
+                    final List<Epic> epics = tm.getEpics();
                     final String response = gson.toJson(epics);
                     h.getResponseHeaders().add("X-TM-Method", "getEpics");
                     sendResponse(h, response, 200);
@@ -325,7 +321,7 @@ public class HttpTaskServer {
                 final int id = Integer.parseInt(idQuery);
                 sendServerMassage("*Клиент сделал " + h.getRequestMethod()
                         + " запрос на получение Эпика с ID=" + id);
-                final Epic epic = fileTaskManager.getEpic(id);
+                final Epic epic = tm.getEpic(id);
                 final String response = gson.toJson(epic);
                 h.getResponseHeaders().add("X-TM-Method", "getEpic");
                 sendResponse(h, response, 200);
@@ -352,14 +348,14 @@ public class HttpTaskServer {
                     }
 
                     if (idEpic == 0) {
-                        int newId = fileTaskManager.addNewEpic(epic);
+                        int newId = tm.addNewEpic(epic);
                         h.getResponseHeaders().add("X-TM-Method", "addNewEpic");
                         sendServerMassage("*В ТМ на сервере успешно создан новый Эпик: "
-                                + fileTaskManager.getEpic(newId).toString());
+                                + tm.getEpic(newId).toString());
                         sendResponse(h, "Добавлен новый Эпик", 201);
                     } else {
-                        oldEpic = fileTaskManager.getEpic(idEpic);
-                        fileTaskManager.updateEpic(epic);
+                        oldEpic = tm.getEpic(idEpic);
+                        tm.updateEpic(epic);
                         h.getResponseHeaders().add("X-TM-Method", "updateEpic");
                         sendServerMassage("*В ТМ на сервере клиент обновил Эпик ID=" + idEpic);
                         sendServerMassage("*Старая версия Эпика: " + oldEpic);
@@ -374,13 +370,13 @@ public class HttpTaskServer {
                 if (query == null) {
                     sendServerMassage("*Клиент сделал запрос "
                             + h.getRequestMethod() + " на удаление всех Эпиков");
-                    if (fileTaskManager.getEpics().isEmpty()) {
+                    if (tm.getEpics().isEmpty()) {
                         final String response = "Список Эпиков уже пуст. Повторить это действие невозможно";
                         sendResponse(h, response, 400);
                         sendServerMassage("*Клиент пытался удалить все Эпики, но список уже пуст");
                         return;
                     }
-                    fileTaskManager.deleteAllEpics();
+                    tm.deleteAllEpics();
                     final String response = "Вы удалили все Эпики";
                     h.getResponseHeaders().add("X-TM-Method", "deleteAllEpics");
                     sendResponse(h, response, 200);
@@ -391,13 +387,13 @@ public class HttpTaskServer {
                 final int id = Integer.parseInt(idQuery);
                 sendServerMassage("*Клиент сделал запрос " + h.getRequestMethod()
                         + " на удаление Эпика с ID=" + id);
-                if (fileTaskManager.getEpic(id) == null) {
+                if (tm.getEpic(id) == null) {
                     final String response = "Эпика с таким ID=" + id + " не существует.";
                     sendResponse(h, response, 400);
                     sendServerMassage("*Клиент пытался удалить Эпик с ID=" + id + " но его не существует");
                     return;
                 }
-                fileTaskManager.removeEpic(id);
+                tm.removeEpic(id);
                 final String response = "Вы удалили Эпик с ID=" + id;
                 h.getResponseHeaders().add("X-TM-Method", "removeEpic");
                 sendResponse(h, response, 200);
@@ -454,7 +450,7 @@ public class HttpTaskServer {
                         + " на странице: " + h.getRequestURI());
             }
             case "endpoint" -> {
-                mError = "Запрашиваемый адрес <b>" + "http://localhost:" + PORT + h.getRequestURI()
+                mError = "Запрашиваемый адрес <b>" + "http://localhost:" + PORT_HTTP_TASKS + h.getRequestURI()
                         + "</b> не существует. "
                         + "Доступные страницы: <ul>"
                         + "<a href=\"\\tasks\\\"><li>Priority Tasks</a></li>"

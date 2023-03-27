@@ -1,5 +1,6 @@
 import model.*;
 import service.FileBackedTasksManager;
+import service.HttpTaskManager;
 import service.Managers;
 import service.servers.HttpTaskServer;
 import service.servers.KVServer;
@@ -9,14 +10,14 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
+import static cfg.config.PORT_KV;
+
 public class Main {
     public static void main(String[] args) throws IOException {
         File file = new File("src" + File.separator + "main" + File.separator + "resources" + File.separator
                 + "task.csv");
 
-        FileBackedTasksManager tasksManagerTest = (FileBackedTasksManager) Managers.getDefault();
-
-        Task task1 = new Task(TaskType.TASK, "Задача 1", "Описание Задача 1",
+/*        Task task1 = new Task(TaskType.TASK, "Задача 1", "Описание Задача 1",
                 TaskStatus.NEW, 15,
                 LocalDateTime.of(2023, 1, 1, 0, 2));
         final int idTask1 = tasksManagerTest.addNewTask(task1);
@@ -58,7 +59,7 @@ public class Main {
         subtaskUpdate1.setId(subtaskId1);
         tasksManagerTest.updateSubtask(subtaskUpdate1);
 
-        System.out.println(tasksManagerTest.getPrioritizedTasks());
+        System.out.println(tasksManagerTest.getPrioritizedTasks());*/
 
         FileBackedTasksManager tasksManagerFBTest = FileBackedTasksManager.loadFromFile(file);
         System.out.println(tasksManagerFBTest.getTasks());
@@ -68,7 +69,11 @@ public class Main {
         System.out.println(tasksManagerFBTest.getPrioritizedTasks());
 
         new KVServer().start();
-        HttpTaskServer server = new HttpTaskServer(tasksManagerFBTest);
+        HttpTaskServer server = new HttpTaskServer();
         server.runServer();
+
+        HttpTaskManager taskServer = new HttpTaskManager(PORT_KV);
+        taskServer.put();
+        taskServer.load();
     }
 }

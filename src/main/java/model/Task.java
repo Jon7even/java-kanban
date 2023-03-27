@@ -1,10 +1,9 @@
 package model;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
-import static service.adapters.LocalDateAdapter.DATE_TIME_FORMATTER;
+import static cfg.config.DATE_TIME_FORMATTER;
 
 public class Task {
     protected int id;

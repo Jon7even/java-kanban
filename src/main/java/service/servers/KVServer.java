@@ -1,6 +1,6 @@
 package service.servers;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static cfg.config.*;
 import static service.ServerLogsUtils.sendServerMassage;
 
 import java.io.IOException;
@@ -15,14 +15,13 @@ import com.sun.net.httpserver.HttpServer;
  * Постман: https://www.getpostman.com/collections/a83b61d9e1c81c10575c
  */
 public class KVServer {
-    public static final int PORT = 8077;
     private final String apiToken;
     private final HttpServer server;
     private final Map<String, String> data = new HashMap<>();
 
     public KVServer() throws IOException {
         apiToken = generateApiToken();
-        server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
+        server = HttpServer.create(new InetSocketAddress(HOSTNAME, PORT_KV), 0);
         server.createContext("/register", this::register);
         server.createContext("/save", this::save);
         server.createContext("/load", this::load);
@@ -78,7 +77,7 @@ public class KVServer {
                 }
                 data.put(key, value);
                 sendServerMassage("*KVServer успешно создал/обновил в БД значение для ключа " + key);
-                h.sendResponseHeaders(201, 0);
+                h.sendResponseHeaders(200, 0);
             } else {
                 errorInMethod(h, "POST");
             }
@@ -100,7 +99,7 @@ public class KVServer {
     public void start() {
         sendServerMassage("API_TOKEN: " + apiToken);
         server.start();
-        sendServerMassage("KVServer запущен и прослушивает порт: " + PORT);
+        sendServerMassage("KVServer запущен и прослушивает порт: " + PORT_KV);
     }
 
     private String generateApiToken() {
@@ -113,7 +112,7 @@ public class KVServer {
     }
 
     protected String readText(HttpExchange h) throws IOException {
-        return new String(h.getRequestBody().readAllBytes(), UTF_8);
+        return new String(h.getRequestBody().readAllBytes(), DEFAULT_CHARSET);
     }
 
     private void errorInMethod(HttpExchange h, String isExpected) throws IOException {
@@ -123,7 +122,7 @@ public class KVServer {
     }
 
     protected void sendText(HttpExchange h, String text) throws IOException {
-        byte[] resp = text.getBytes(UTF_8);
+        byte[] resp = text.getBytes(DEFAULT_CHARSET);
         h.getResponseHeaders().add("Content-Type", "application/json");
         h.sendResponseHeaders(200, resp.length);
         h.getResponseBody().write(resp);

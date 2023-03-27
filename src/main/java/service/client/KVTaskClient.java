@@ -8,15 +8,15 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+import static cfg.config.HOSTNAME;
 import static service.ServerLogsUtils.sendServerMassage;
 
 public class KVTaskClient {
-    private static final String HOSTNAME = "localhost";
     private final String apiToken;
     private final String url;
 
     public KVTaskClient(int port) {
-        url = "http://" + HOSTNAME + port + "/";
+        url = "http://" + HOSTNAME + ":" + port + "/";
         apiToken = getToken(url);
     }
 
@@ -53,7 +53,7 @@ public class KVTaskClient {
         }
     }
 
-    public void save(String key, String value) {
+    public void put(String key, String value) {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url + "save/"+ key + "?API_TOKEN=" + apiToken))
                 .POST(HttpRequest.BodyPublishers.ofString(value)).build();

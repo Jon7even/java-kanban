@@ -1,16 +1,13 @@
 package service;
 
-
-import java.io.File;
+import static cfg.config.PORT_KV;
 
 public class Managers {
     private Managers() {
     }
 
     public static TaskManager getDefault() {
-        File file = new File("src" + File.separator + "main" + File.separator + "resources" + File.separator
-                + "task.csv");
-        return new FileBackedTasksManager(file);
+        return new HttpTaskManager(PORT_KV);
     }
 
     public static HistoryManager getDefaultHistory() {

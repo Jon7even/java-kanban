@@ -1,6 +1,9 @@
 package service;
 
-import model.*;
+import model.Epic;
+import model.Subtask;
+import model.Task;
+import model.TaskStatus;
 import service.exception.ManagerTimeIntersectionsException;
 
 import java.time.Duration;
@@ -8,7 +11,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 
-import static service.adapters.LocalDateAdapter.DATE_TIME_FORMATTER;
+import static cfg.config.DATE_TIME_FORMATTER;
 
 public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, Task> tasks = new HashMap<>();

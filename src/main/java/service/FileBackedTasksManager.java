@@ -27,7 +27,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     public static FileBackedTasksManager loadFromFile(File file) {
-        final FileBackedTasksManager taskManager = new FileBackedTasksManager(file);
+        FileBackedTasksManager taskManager = new FileBackedTasksManager(file);
 
         if (file.exists()) {
             List<String> lines = new ArrayList<>();
@@ -56,7 +56,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 restoredTasks.add(fromString(lines.get(i)));
             }
 
-            readListTasks(restoredTasks, taskManager);
+            setTaskManagerListTasks(restoredTasks, taskManager);
 
             if (sb.toString().isBlank()) {
                 return taskManager;
@@ -79,7 +79,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return taskManager;
     }
 
-    private void save() {
+    protected void save() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, DEFAULT_CHARSET))) {
 
             writer.write(columnNamesCSV + "\n");
@@ -274,7 +274,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return list;
     }
 
-    protected static TaskManager readListTasks(List<Task> restoredTasks, FileBackedTasksManager taskManager) {
+    protected static void setTaskManagerListTasks(List<Task> restoredTasks, FileBackedTasksManager taskManager) {
         int maxId = 0;
 
         for (Task task : restoredTasks) {
@@ -290,14 +290,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 taskManager.tasks.put(currentId, task);
             }
         }
-
         for (Integer id : taskManager.subTasks.keySet()) {
             int epicId = taskManager.subTasks.get(id).getRelationEpicId();
             taskManager.epicTasks.get(epicId).addSubtaskId(id);
         }
-
         taskManager.idGenerate = maxId;
-        return taskManager;
     }
 
 }

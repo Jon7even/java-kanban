@@ -11,9 +11,6 @@ import java.util.Map;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
-/**
- * Постман: https://www.getpostman.com/collections/a83b61d9e1c81c10575c
- */
 public class KVServer {
     private final String apiToken;
     private final HttpServer server;
@@ -28,75 +25,75 @@ public class KVServer {
     }
 
     private void load(HttpExchange h) throws IOException {
-        sendServerMassage("*Клиент сделал запрос на выгрузку данных с KVServer");
+        sendServerMassage("KVTaskClient сделал запрос на выгрузку данных с KVServer");
         if (!hasAuth(h)) {
-            sendServerMassage("Запрос неавторизован, нужен параметр в query API_TOKEN со значением апи-ключа");
+            sendServerMassage("*Запрос неавторизован, нужен параметр в query API_TOKEN со значением апи-ключа");
             h.sendResponseHeaders(403, 0);
             return;
         }
-        if ("GET".equals(h.getRequestMethod())) {
+        if (REQUEST_GET.equals(h.getRequestMethod())) {
             String key = h.getRequestURI().getPath().substring("/load/".length());
             if (key.isEmpty()) {
-                sendServerMassage("Key для получения данных пустой. key указывается в пути: /load/{key}");
+                sendServerMassage("*Key для получения данных пустой. key указывается в пути: /load/{key}");
                 h.sendResponseHeaders(400, 0);
                 return;
             }
-			if (!data.containsKey(key)) {
-				sendServerMassage("*Клиент пытается получить данные по несуществующему ключу: " + key);
-				h.sendResponseHeaders(404, 0);
-				return;
-			}
-			sendText(h, data.get(key));
-            sendServerMassage("*KVServer отправил данные клиенту по ключу: " + key);
+            if (!data.containsKey(key)) {
+                sendServerMassage("*KVTaskClient пытается получить данные по несуществующему ключу: " + key);
+                h.sendResponseHeaders(404, 0);
+                return;
+            }
+            sendText(h, data.get(key));
+            sendServerMassage("KVServer отправил данные по ключу: " + key);
             h.sendResponseHeaders(200, 0);
         } else {
-            errorInMethod(h, "GET");
+            errorInMethod(h, REQUEST_GET);
         }
     }
 
     private void save(HttpExchange h) throws IOException {
         try (h) {
-            sendServerMassage("*Клиент сделал запрос на сохранение данных ТМ на сервер KVServer");
+            sendServerMassage("KVTaskClient сделал запрос на сохранение данных ТМ на KVServer");
             if (!hasAuth(h)) {
-                sendServerMassage("Запрос неавторизован, нужен параметр в query API_TOKEN со значением апи-ключа");
+                sendServerMassage("*Запрос неавторизован, нужен параметр в query API_TOKEN со значением апи-ключа");
                 h.sendResponseHeaders(403, 0);
                 return;
             }
-            if ("POST".equals(h.getRequestMethod())) {
+            if (REQUEST_POST.equals(h.getRequestMethod())) {
                 String key = h.getRequestURI().getPath().substring("/save/".length());
                 if (key.isEmpty()) {
-                    sendServerMassage("Key для сохранения пустой. key указывается в пути: /save/{key}");
+                    sendServerMassage("*Key для сохранения пустой. key указывается в пути: /save/{key}");
                     h.sendResponseHeaders(400, 0);
                     return;
                 }
                 String value = readText(h);
                 if (value.isEmpty()) {
-                    sendServerMassage("Value для сохранения пустой. value указывается в теле запроса");
+                    sendServerMassage("*Value для сохранения пустой. value указывается в теле запроса");
                     h.sendResponseHeaders(400, 0);
                     return;
                 }
                 data.put(key, value);
-                sendServerMassage("*KVServer успешно создал/обновил в БД значение для ключа " + key);
+                sendServerMassage("KVServer успешно создал/обновил в БД значение для ключа " + key);
                 h.sendResponseHeaders(200, 0);
             } else {
-                errorInMethod(h, "POST");
+                errorInMethod(h, REQUEST_POST);
             }
         }
     }
 
     private void register(HttpExchange h) throws IOException {
         try (h) {
-            sendServerMassage("Клиент сделал запрос на выдачу токена /register");
-            if ("GET".equals(h.getRequestMethod())) {
+            sendServerMassage("KVTaskClient сделал запрос на выдачу токена /register");
+            if (REQUEST_GET.equals(h.getRequestMethod())) {
                 sendText(h, apiToken);
-                sendServerMassage("*Клиент получил токен: " + apiToken);
+                sendServerMassage("KVServer выдал токен: " + apiToken);
             } else {
-                errorInMethod(h, "GET");
+                errorInMethod(h, REQUEST_GET);
             }
         }
     }
 
-    public void start() {
+    public void runServer() {
         sendServerMassage("API_TOKEN: " + apiToken);
         server.start();
         sendServerMassage("KVServer запущен и прослушивает порт: " + PORT_KV);
@@ -116,14 +113,14 @@ public class KVServer {
     }
 
     private void errorInMethod(HttpExchange h, String isExpected) throws IOException {
-        sendServerMassage("Сервер ожидает запрос - " + isExpected
-                + " а клиент отправил неправильный запрос - " + h.getRequestMethod());
+        sendServerMassage("KVServer ожидает запрос - " + isExpected
+                + " а KVTaskClient отправил неправильный запрос - " + h.getRequestMethod());
         h.sendResponseHeaders(405, 0);
     }
 
     protected void sendText(HttpExchange h, String text) throws IOException {
         byte[] resp = text.getBytes(DEFAULT_CHARSET);
-        h.getResponseHeaders().add("Content-Type", "application/json");
+        h.getResponseHeaders().add(CONTENT_TYPE, CONTENT_JSON);
         h.sendResponseHeaders(200, resp.length);
         h.getResponseBody().write(resp);
     }

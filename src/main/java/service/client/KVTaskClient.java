@@ -9,7 +9,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 import static cfg.config.HOSTNAME;
-import static service.ServerLogsUtils.sendServerMassage;
 
 public class KVTaskClient {
     private final String apiToken;
@@ -22,7 +21,7 @@ public class KVTaskClient {
 
     private String getToken(String url) {
         HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder().GET().uri(URI.create(url + "register")).build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url + "register")).GET().build();
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             int status = response.statusCode();
@@ -31,8 +30,7 @@ public class KVTaskClient {
             }
             return response.body();
         } catch (IOException | InterruptedException e) {
-            sendServerMassage("*У KVTaskClient во время получения Токена /register произошла ошибка.");
-            throw new NetworkingException("Error", e);
+            throw new NetworkingException("*У KVTaskClient во время получения Токена /register произошла ошибка: ", e);
         }
     }
 
@@ -48,8 +46,7 @@ public class KVTaskClient {
             }
             return response.body();
         } catch (IOException | InterruptedException e) {
-            sendServerMassage("*У KVTaskClient во время получения данных /load произошла ошибка.");
-            throw new NetworkingException("Error", e);
+            throw new NetworkingException("*У KVTaskClient во время получения данных /load произошла ошибка: ", e);
         }
     }
 
@@ -64,25 +61,7 @@ public class KVTaskClient {
                 throw new NetworkingException("*KVTaskClient при попытке сохранить /save вместо 200 получил " + status);
             }
         } catch (IOException | InterruptedException e) {
-            sendServerMassage("*У KVTaskClient во время сохранения данных /save произошла ошибка.");
-            throw new NetworkingException("Error", e);
+            throw new NetworkingException("*У KVTaskClient во время сохранения данных /save произошла ошибка: ", e);
         }
     }
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

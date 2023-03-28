@@ -68,12 +68,16 @@ public class Main {
         System.out.println(tasksManagerFBTest.getHistory());
         System.out.println(tasksManagerFBTest.getPrioritizedTasks());
 
-        new KVServer().start();
+        KVServer kvServer = new KVServer();
+        kvServer.runServer();
         HttpTaskServer server = new HttpTaskServer();
         server.runServer();
-
         HttpTaskManager taskServer = new HttpTaskManager(PORT_KV);
-        taskServer.put();
-        taskServer.load();
+        Task task = tasksManagerFBTest.getTask(1);
+        taskServer.addNewTask(task);
+
+        HttpTaskManager taskServer2 = taskServer.loadFromHttp();
+        System.out.println(taskServer2.getTasks());
+
     }
 }

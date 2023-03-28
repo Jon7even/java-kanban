@@ -23,7 +23,8 @@ public class HttpTaskManager extends FileBackedTasksManager {
         client = new KVTaskClient(port);
     }
 
-    public void put() {
+    @Override
+    protected void save() {
         String jsonTasks = gson.toJson(new ArrayList<>(tasks.values()));
         client.put("tasks", jsonTasks);
         String jsonEpic = gson.toJson(new ArrayList<>(epicTasks.values()));
@@ -35,8 +36,9 @@ public class HttpTaskManager extends FileBackedTasksManager {
         client.put("history", jsonHistory);
     }
 
-    public void load() {
-        final HttpTaskManager taskManager = new HttpTaskManager(PORT_KV);
+    public HttpTaskManager loadFromHttp() {
+        HttpTaskManager taskManager = new HttpTaskManager(PORT_KV);
+
         ArrayList<Task> restoredTasks = new ArrayList<>();
         ArrayList<Task> tasks = gson.fromJson(client.load("tasks"), new TypeToken<ArrayList<Task>>() {
         }.getType());
@@ -50,11 +52,11 @@ public class HttpTaskManager extends FileBackedTasksManager {
         restoredTasks.addAll(subtasks);
         restoredTasks.addAll(epics);
         addTasks(restoredTasks, taskManager);
+        return taskManager;
     }
 
-    private TaskManager addTasks(ArrayList<Task> tasks, HttpTaskManager httpTaskManager) {
-        readListTasks(tasks, httpTaskManager);
-        return httpTaskManager;
+    private void addTasks(ArrayList<Task> tasks, HttpTaskManager httpTaskManager) {
+        setTaskManagerListTasks(tasks, httpTaskManager);
     }
 
 }

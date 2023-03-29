@@ -99,6 +99,11 @@ public class KVServer {
         sendServerMassage("KVServer запущен и прослушивает порт: " + PORT_KV);
     }
 
+    public void stop() {
+        sendServerMassage("Отключаем KVServer...");
+        server.stop(0);
+    }
+
     private String generateApiToken() {
         return "" + System.currentTimeMillis();
     }

@@ -55,26 +55,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             for (int i = 0; i < lines.size() - 2; i++) {
                 restoredTasks.add(fromString(lines.get(i)));
             }
-
             setTaskManagerListTasks(restoredTasks, taskManager);
-
             if (sb.toString().isBlank()) {
                 return taskManager;
             }
-
-            List<Integer> history = historyFromString(sb.toString());
-
-            for (Integer id : history) {
-                for (Task task : restoredTasks) {
-                    if (task.getId() == id) {
-                        taskManager.historyManager.addHistoryTask(task);
-                    }
-                }
-            }
+            List<Integer> historyIdTasks = historyFromString(sb.toString());
+            setTaskManagerHistoryTasks(restoredTasks, historyIdTasks, taskManager);
             taskManager.updateYearlyTimeTableAllTasksAndSubtasks();
             taskManager.prioritizedTasks.addAll(taskManager.tasks.values());
             taskManager.prioritizedTasks.addAll(taskManager.subTasks.values());
-
         }
         return taskManager;
     }
@@ -295,6 +284,17 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             taskManager.epicTasks.get(epicId).addSubtaskId(id);
         }
         taskManager.idGenerate = maxId;
+    }
+
+    protected static void setTaskManagerHistoryTasks(List<Task> restoredTasks, List<Integer> historyIdTasks,
+                                                     FileBackedTasksManager taskManager) {
+        for (Integer id : historyIdTasks) {
+            for (Task task : restoredTasks) {
+                if (task.getId() == id) {
+                    taskManager.historyManager.addHistoryTask(task);
+                }
+            }
+        }
     }
 
 }

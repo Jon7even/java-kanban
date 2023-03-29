@@ -28,6 +28,13 @@ public class Epic extends Task {
         this.endTime = startTime;
     }
 
+    public Epic(int id, TaskType type, String name, String description, TaskStatus status, long duration,
+                LocalDateTime startTime) {
+        super(type, name, description, status, duration, startTime);
+        this.endTime = startTime;
+        this.id = id;
+    }
+
     public void addSubtaskId(int id) {
         relationSubtaskId.add(id);
     }

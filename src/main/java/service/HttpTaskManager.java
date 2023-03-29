@@ -8,6 +8,7 @@ import model.Task;
 import service.client.KVTaskClient;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static cfg.config.GsonBuilderCreate;
@@ -43,21 +44,19 @@ public class HttpTaskManager extends FileBackedTasksManager {
         ArrayList<Task> tasks = gson.fromJson(client.load("tasks"), new TypeToken<ArrayList<Task>>() {
         }.getType());
         ArrayList<Subtask> subtasks = gson.fromJson(client.load("subtasks"), new TypeToken<ArrayList<Subtask>>() {
-        }
-                .getType());
+        }.getType());
         ArrayList<Epic> epics = gson.fromJson(client.load("epics"), new TypeToken<ArrayList<Epic>>() {
-        }
-                .getType());
+        }.getType());
+        List<Integer> historyIdTasks = gson.fromJson(client.load("history"), new TypeToken<ArrayList<Integer>>() {
+        }.getType());
         restoredTasks.addAll(tasks);
         restoredTasks.addAll(subtasks);
         restoredTasks.addAll(epics);
-        addTasks(restoredTasks, taskManager);
+        setTaskManagerListTasks(tasks, taskManager);
+        setTaskManagerHistoryTasks(restoredTasks, historyIdTasks, taskManager);
+        taskManager.updateYearlyTimeTableAllTasksAndSubtasks();
+        taskManager.prioritizedTasks.addAll(taskManager.tasks.values());
+        taskManager.prioritizedTasks.addAll(taskManager.subTasks.values());
         return taskManager;
     }
-
-    private void addTasks(ArrayList<Task> tasks, HttpTaskManager httpTaskManager) {
-        setTaskManagerListTasks(tasks, httpTaskManager);
-    }
-
 }
-

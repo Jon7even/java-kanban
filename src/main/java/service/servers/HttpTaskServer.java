@@ -38,6 +38,11 @@ public class HttpTaskServer {
         sendServerMassage("HttpTaskServer запущен и прослушивает порт: " + PORT_HTTP_TASKS);
     }
 
+    public void stop() {
+        sendServerMassage("Отключаем HttpTaskServer...");
+        server.stop(0);
+    }
+
     private void handler(HttpExchange h) {
         try (h) {
             final String path = h.getRequestURI().getPath().substring(7);
@@ -134,7 +139,6 @@ public class HttpTaskServer {
                         + " на создание/обновление Задачи на странице: " + h.getRequestURI());
                 Optional<JsonElement> jsonElement = getJsonFromRequest(h);
                 if (jsonElement.isPresent()) {
-                    final Task oldTask;
                     final Task task = gson.fromJson(jsonElement.get(), Task.class);
                     final int idTask = task.getId();
 
@@ -144,15 +148,15 @@ public class HttpTaskServer {
                         handleError(h, "validCheckingFields", 400);
                         return;
                     }
+                    final Task oldTask = taskManager.getTask(idTask);
 
-                    if (idTask == 0) {
+                    if (idTask == 0 || oldTask == null) {
                         int newId = taskManager.addNewTask(task);
                         h.getResponseHeaders().add(TASK_MANAGER_METHOD, "addNewTask");
                         sendServerMassage("*В ТМ на сервере успешно создана новая Задача: "
                                 + taskManager.getTask(newId).toString());
                         sendResponse(h, "Добавлена новая Задача", 201);
                     } else {
-                        oldTask = taskManager.getTask(idTask);
                         taskManager.updateTask(task);
                         h.getResponseHeaders().add(TASK_MANAGER_METHOD, "updateTask");
                         sendServerMassage("*В ТМ на сервере клиент обновил Задачу ID=" + idTask);
@@ -233,7 +237,6 @@ public class HttpTaskServer {
                         + " на создание/обновление Подзадачи на странице: " + h.getRequestURI());
                 Optional<JsonElement> jsonElement = getJsonFromRequest(h);
                 if (jsonElement.isPresent()) {
-                    final Subtask oldSubtask;
                     final Subtask subtask = gson.fromJson(jsonElement.get(), Subtask.class);
                     final int idSubtask = subtask.getId();
 
@@ -244,7 +247,9 @@ public class HttpTaskServer {
                         return;
                     }
 
-                    if (idSubtask == 0) {
+                    final Subtask oldSubtask = taskManager.getSubtask(idSubtask);
+
+                    if (idSubtask == 0 || oldSubtask == null) {
                         int newId = taskManager.addNewSubtask(subtask);
                         h.getResponseHeaders().add(TASK_MANAGER_METHOD, "addNewSubtask");
                         if (newId == -1) {
@@ -256,7 +261,6 @@ public class HttpTaskServer {
                                 + taskManager.getTask(newId).toString());
                         sendResponse(h, "Добавлена новая Подзадача", 201);
                     } else {
-                        oldSubtask = taskManager.getSubtask(idSubtask);
                         taskManager.updateSubtask(subtask);
                         h.getResponseHeaders().add(TASK_MANAGER_METHOD, "updateSubtask");
                         sendServerMassage("*В ТМ на сервере клиент обновил Подзадачу ID=" + idSubtask);
@@ -337,7 +341,7 @@ public class HttpTaskServer {
                         + " на создание/обновление Эпика на странице: " + h.getRequestURI());
                 Optional<JsonElement> jsonElement = getJsonFromRequest(h);
                 if (jsonElement.isPresent()) {
-                    final Epic oldEpic;
+
                     final Epic epic = gson.fromJson(jsonElement.get(), Epic.class);
                     final int idEpic = epic.getId();
 
@@ -347,21 +351,21 @@ public class HttpTaskServer {
                         handleError(h, "validCheckingFields", 400);
                         return;
                     }
+                    final Epic oldEpic = taskManager.getEpic(idEpic);
 
-                    if (idEpic == 0) {
+                    if (idEpic == 0 || oldEpic == null) {
                         int newId = taskManager.addNewEpic(epic);
                         h.getResponseHeaders().add(TASK_MANAGER_METHOD, "addNewEpic");
                         sendServerMassage("*В ТМ на сервере успешно создан новый Эпик: "
                                 + taskManager.getEpic(newId).toString());
                         sendResponse(h, "Добавлен новый Эпик", 201);
                     } else {
-                        oldEpic = taskManager.getEpic(idEpic);
                         taskManager.updateEpic(epic);
                         h.getResponseHeaders().add(TASK_MANAGER_METHOD, "updateEpic");
                         sendServerMassage("*В ТМ на сервере клиент обновил Эпик ID=" + idEpic);
                         sendServerMassage("*Старая версия Эпика: " + oldEpic);
-                        sendServerMassage("*Новая версия Эпик: " + epic);
-                        sendResponse(h, "Задача с ID=" + idEpic + " обновлена", 200);
+                        sendServerMassage("*Новая версия Эпика: " + epic);
+                        sendResponse(h, "Эпик с ID=" + idEpic + " обновлен", 200);
                     }
                 } else {
                     handleError(h, "badRequest", 400);

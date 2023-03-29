@@ -26,8 +26,12 @@ public class config {
 
     public static Gson GsonBuilderCreate() {
         GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting().serializeNulls()
-                .registerTypeAdapter(LocalDateTime.class, new LocalDateAdapter());
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateAdapter().nullSafe());
         return gsonBuilder.create();
     }
+
+
+
+
 
 }

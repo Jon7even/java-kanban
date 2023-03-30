@@ -34,7 +34,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 epic1.getId());
 
         subtask2 = new Subtask(5, TaskType.SUBTASK, "Test Subtask 1", "Subtask 2 test description",
-                TaskStatus.NEW, 15, LocalDateTime.of(2023, 1, 1, 1, 0),
+                TaskStatus.NEW, 15, LocalDateTime.of(2023, 1, 1, 2, 0),
                 epic1.getId());
     }
 

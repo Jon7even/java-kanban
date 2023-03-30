@@ -55,7 +55,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             for (int i = 0; i < lines.size() - 2; i++) {
                 restoredTasks.add(fromString(lines.get(i)));
             }
-            setTaskManagerListTasks(restoredTasks, taskManager);
+            setTaskManagerListTasks(restoredTasks, taskManager, true);
             if (sb.toString().isBlank()) {
                 return taskManager;
             }
@@ -263,7 +263,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return list;
     }
 
-    protected static void setTaskManagerListTasks(List<Task> restoredTasks, FileBackedTasksManager taskManager) {
+    protected static void setTaskManagerListTasks(List<Task> restoredTasks, FileBackedTasksManager taskManager,
+                                                  boolean isFile) {
         int maxId = 0;
 
         for (Task task : restoredTasks) {
@@ -279,9 +280,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 taskManager.tasks.put(currentId, task);
             }
         }
-        for (Integer id : taskManager.subTasks.keySet()) {
-            int epicId = taskManager.subTasks.get(id).getRelationEpicId();
-            taskManager.epicTasks.get(epicId).addSubtaskId(id);
+        if (isFile) {
+            for (Integer id : taskManager.subTasks.keySet()) {
+                int epicId = taskManager.subTasks.get(id).getRelationEpicId();
+                taskManager.epicTasks.get(epicId).addSubtaskId(id);
+            }
         }
         taskManager.idGenerate = maxId;
     }

@@ -32,8 +32,8 @@ public class HttpTaskManagerTest extends TaskManagerTest<HttpTaskManager> {
 
     @AfterEach
     protected void tearDown() {
-        kvServer.stop();
         httpTaskServer.stop();
+        kvServer.stop();
     }
 
     @Test
@@ -71,7 +71,6 @@ public class HttpTaskManagerTest extends TaskManagerTest<HttpTaskManager> {
         taskManager.addNewEpic(epic2);
         taskManager.addNewEpic(epic1);
         final int idSubtask1 = taskManager.addNewSubtask(subtask1); //POST /tasks/subtask/ Body: {subtask ..}
-        taskManager.addNewSubtask(subtask2);
         List<Subtask> listSubtasks = taskManager.getSubtasks();
         Subtask subtaskSaved = taskManager.getSubtask(idSubtask1);
         HttpTaskManager newHttpTaskManager = taskManager.loadFromHttp();
@@ -82,7 +81,7 @@ public class HttpTaskManagerTest extends TaskManagerTest<HttpTaskManager> {
         Subtask serializedSubtask = newHttpTaskManager.getSubtask(idSubtask1); //GET /tasks/subtask/?id=
         assertEquals(subtaskSaved, serializedSubtask, "Subtasks not equal! /tasks/subtask/?id=" + idSubtask1);
 
-        int idSubtaskDelete = newHttpTaskManager.addNewSubtask(subtask1);
+        int idSubtaskDelete = newHttpTaskManager.addNewSubtask(subtask2);
         newHttpTaskManager.removeSubtask(idSubtaskDelete); //DELETE /tasks/subtask/?id=
 
         List<Subtask> listSubtasksAfterDelete = newHttpTaskManager.getSubtasks();
@@ -96,22 +95,21 @@ public class HttpTaskManagerTest extends TaskManagerTest<HttpTaskManager> {
 
     @Test
     public void endpointEpic() {
-        taskManager.addNewEpic(epic2);
+        int idEpic2 = taskManager.addNewEpic(epic2);
         int idEpic1 = taskManager.addNewEpic(epic1); //POST /tasks/epic/ Body: {subtask ..}
         taskManager.addNewSubtask(subtask1);
         taskManager.addNewSubtask(subtask2);
+        Epic epicSaved = taskManager.getEpic(idEpic2);
         List<Epic> listEpics = taskManager.getEpics();
-        Epic epicSaved = taskManager.getEpic(idEpic1);
         HttpTaskManager newHttpTaskManager = taskManager.loadFromHttp();
 
         List<Epic> newListEpics = newHttpTaskManager.getEpics(); //GET /tasks/epic
         assertEquals(listEpics.size(), newListEpics.size(), "Get epics not equal!");
 
-        Epic serializedEpic = newHttpTaskManager.getEpic(idEpic1); //GET /tasks/epic/?id=
-        assertEquals(epicSaved, serializedEpic, "Epics not equal! /tasks/epic/?id=" + idEpic1);
+        Epic serializedEpic = newHttpTaskManager.getEpic(idEpic2); //GET /tasks/epic/?id=
+        assertEquals(epicSaved, serializedEpic, "Epics not equal! /tasks/epic/?id=" + idEpic2);
 
-        int idEpicDelete = newHttpTaskManager.addNewSubtask(subtask1);
-        newHttpTaskManager.removeTask(idEpicDelete); //DELETE /tasks/epic/?id=
+        newHttpTaskManager.removeEpic(idEpic1); //DELETE /tasks/epic/?id=
 
         List<Epic> listSubtasksAfterDelete = newHttpTaskManager.getEpics();
         assertEquals(1, listSubtasksAfterDelete.size(), "Epics don't Remove");
@@ -124,13 +122,21 @@ public class HttpTaskManagerTest extends TaskManagerTest<HttpTaskManager> {
 
     @Test //GET /tasks/subtask/epic/?id=
     public void shouldGetSubtaskByEpicId() {
-        taskManager.addNewEpic(epic2);
-        final int idEpic = taskManager.addNewEpic(epic1);
-        taskManager.addNewSubtask(subtask1);
-        taskManager.addNewSubtask(subtask2);
-        List<Subtask> listAllSubTaskForEpic = taskManager.getAllSubTaskForEpic(idEpic);
+        Epic epicTest = new Epic(TaskType.EPIC, "Test Epic 1", "Epic 1 test description",
+                TaskStatus.NEW);
+        int epicTestId = taskManager.addNewEpic(epicTest);
+        Subtask subtaskT1 = new Subtask(TaskType.SUBTASK, "Test Subtask 1", "Subtask 1 test description",
+                TaskStatus.NEW, 15, LocalDateTime.of(2023, 1, 2, 0, 30),
+                epicTestId);
+        taskManager.addNewSubtask(subtaskT1);
+        Subtask subtaskT2 = new Subtask(TaskType.SUBTASK, "Test Subtask 1", "Subtask 2 test description",
+                TaskStatus.NEW, 15, LocalDateTime.of(2023, 1, 1, 5, 0),
+                epicTestId);
+        taskManager.addNewSubtask(subtaskT2);
+
+        List<Subtask> listAllSubTaskForEpic = taskManager.getAllSubTaskForEpic(epicTestId);
         HttpTaskManager newHttpTaskManager = taskManager.loadFromHttp();
-        List<Subtask> newListAllSubTaskForEpic = newHttpTaskManager.getAllSubTaskForEpic(idEpic);
+        List<Subtask> newListAllSubTaskForEpic = newHttpTaskManager.getAllSubTaskForEpic(epicTestId);
         assertEquals(listAllSubTaskForEpic.size(), newListAllSubTaskForEpic.size(), "History tasks not equal!");
     }
 

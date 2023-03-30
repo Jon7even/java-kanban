@@ -64,8 +64,9 @@ public class HttpTaskServer {
                 case "epic" -> handleEpic(h);
                 case "subtask" -> handleSubtask(h);
                 case "subtask/epic" -> {
+                    final String query = h.getRequestURI().getQuery();
                     if (h.getRequestMethod().equals(REQUEST_GET)) {
-                        String idQuery = h.getRequestURI().getQuery().substring(3);
+                        String idQuery = query.substring(3);
                         final int id = Integer.parseInt(idQuery);
                         sendServerMassage("*Клиент сделал запрос " + h.getRequestMethod() + " на получение всех "
                                 + "Подзадач у Эпика с ID=" + id);

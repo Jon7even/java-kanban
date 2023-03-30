@@ -108,11 +108,12 @@ public class InMemoryTaskManager implements TaskManager {
             return Collections.emptyList();
         } else {
             List<Integer> idSubtasks = epic.getRelationSubtaskId();
-            List<Subtask> subtask = new ArrayList<>();
+            List<Subtask> subtasks = new ArrayList<>();
             for (Integer idGet : idSubtasks) {
-                subtask.add(subTasks.get(idGet));
+                Subtask subtask = subTasks.get(idGet);
+                subtasks.add(subtask);
             }
-            return subtask;
+            return subtasks;
         }
     }
 

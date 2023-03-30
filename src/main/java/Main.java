@@ -1,5 +1,4 @@
 import model.*;
-import service.FileBackedTasksManager;
 import service.HttpTaskManager;
 import service.servers.HttpTaskServer;
 import service.servers.KVServer;
@@ -54,24 +53,17 @@ public class Main {
         System.out.println(taskManagerHttp.getSubtask(subtaskId2));
 
         Subtask subtaskUpdate1 = new Subtask(TaskType.SUBTASK, "1 Подзадача к эпику 1",
-                "Описание Подзадачи 1", TaskStatus.DONE, 15,
+                "Описание Подзадачи 1 Изменили", TaskStatus.DONE, 15,
                 LocalDateTime.of(2023, 1, 4, 4, 3), epicId1);
         subtaskUpdate1.setId(subtaskId1);
         taskManagerHttp.updateSubtask(subtaskUpdate1);
 
-
-
         HttpTaskManager serializedTasksManager = taskManagerHttp.loadFromHttp();
-
 
         System.out.println(serializedTasksManager.getTasks());
         System.out.println(serializedTasksManager.getEpics());
         System.out.println(serializedTasksManager.getSubtasks());
-        System.out.println(serializedTasksManager.getTask(1));
-        System.out.println(serializedTasksManager.getTask(2));
         System.out.println(serializedTasksManager.getHistory());
-        System.out.println(serializedTasksManager.getEpic(epicId2));
-        System.out.println(serializedTasksManager.getHistory());
-        System.out.println("............." + serializedTasksManager.getPrioritizedTasks());
+        System.out.println(serializedTasksManager.getPrioritizedTasks());
     }
 }

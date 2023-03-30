@@ -6,6 +6,7 @@ import model.Epic;
 import model.Subtask;
 import model.Task;
 import service.client.KVTaskClient;
+import service.exception.NetworkingException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,25 +39,29 @@ public class HttpTaskManager extends FileBackedTasksManager {
     }
 
     public HttpTaskManager loadFromHttp() {
-        HttpTaskManager taskManager = new HttpTaskManager(PORT_KV);
+        try {
+            final HttpTaskManager taskManager = new HttpTaskManager(PORT_KV);
 
-        ArrayList<Task> restoredTasks = new ArrayList<>();
-        ArrayList<Task> tasks = gson.fromJson(client.load("tasks"), new TypeToken<ArrayList<Task>>() {
-        }.getType());
-        ArrayList<Subtask> subtasks = gson.fromJson(client.load("subtasks"), new TypeToken<ArrayList<Subtask>>() {
-        }.getType());
-        ArrayList<Epic> epics = gson.fromJson(client.load("epics"), new TypeToken<ArrayList<Epic>>() {
-        }.getType());
-        List<Integer> historyIdTasks = gson.fromJson(client.load("history"), new TypeToken<ArrayList<Integer>>() {
-        }.getType());
-        restoredTasks.addAll(tasks);
-        restoredTasks.addAll(subtasks);
-        restoredTasks.addAll(epics);
-        setTaskManagerListTasks(tasks, taskManager);
-        setTaskManagerHistoryTasks(restoredTasks, historyIdTasks, taskManager);
-        taskManager.updateYearlyTimeTableAllTasksAndSubtasks();
-        taskManager.prioritizedTasks.addAll(taskManager.tasks.values());
-        taskManager.prioritizedTasks.addAll(taskManager.subTasks.values());
-        return taskManager;
+            List<Task> restoredTasks = new ArrayList<>();
+            ArrayList<Task> tasks = gson.fromJson(client.load("tasks"), new TypeToken<ArrayList<Task>>() {
+            }.getType());
+            restoredTasks.addAll(tasks);
+            ArrayList<Epic> epics = gson.fromJson(client.load("epics"), new TypeToken<ArrayList<Epic>>() {
+            }.getType());
+            restoredTasks.addAll(epics);
+            ArrayList<Subtask> subtasks = gson.fromJson(client.load("subtasks"), new TypeToken<ArrayList<Subtask>>() {
+            }.getType());
+            restoredTasks.addAll(subtasks);
+            setTaskManagerListTasks(restoredTasks, taskManager, false);
+            List<Integer> historyIdTasks = gson.fromJson(client.load("history"), new TypeToken<ArrayList<Integer>>() {
+            }.getType());
+            setTaskManagerHistoryTasks(restoredTasks, historyIdTasks, taskManager);
+            taskManager.updateYearlyTimeTableAllTasksAndSubtasks();
+            taskManager.prioritizedTasks.addAll(taskManager.tasks.values());
+            taskManager.prioritizedTasks.addAll(taskManager.subTasks.values());
+            return taskManager;
+        } catch (Exception e) {
+            throw new NetworkingException("*HttpTaskManager: во время загрузки данных из БД произошла ошибка: ", e);
+        }
     }
 }

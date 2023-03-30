@@ -22,11 +22,12 @@ public class HttpTaskManager extends FileBackedTasksManager {
     public HttpTaskManager(int port) {
         super();
         gson = GsonBuilderCreate();
-        client = new KVTaskClient(port);
+        this.client = new KVTaskClient(port);
     }
 
     @Override
     protected void save() {
+        try {
         String jsonTasks = gson.toJson(new ArrayList<>(tasks.values()));
         client.put("tasks", jsonTasks);
         String jsonEpic = gson.toJson(new ArrayList<>(epicTasks.values()));
@@ -36,6 +37,9 @@ public class HttpTaskManager extends FileBackedTasksManager {
         String jsonHistory = gson.toJson(historyManager.getHistory().stream().map(Task::getId)
                 .collect(Collectors.toList()));
         client.put("history", jsonHistory);
+        } catch (Exception e) {
+            throw new NetworkingException("*HttpTaskManager: во время сохранения данных в БД произошла ошибка: ", e);
+        }
     }
 
     public HttpTaskManager loadFromHttp() {

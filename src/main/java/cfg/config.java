@@ -19,19 +19,13 @@ public class config {
     public static final String REQUEST_GET = "GET";
     public static final String REQUEST_POST = "POST";
     public static final String REQUEST_DELETE = "DELETE";
-
     public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd.MM.yy");
-
 
     public static Gson GsonBuilderCreate() {
         GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting().serializeNulls()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateAdapter().nullSafe());
         return gsonBuilder.create();
     }
-
-
-
-
 
 }

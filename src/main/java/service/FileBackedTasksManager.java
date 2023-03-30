@@ -13,7 +13,6 @@ import java.util.List;
 import static cfg.config.DATE_TIME_FORMATTER;
 import static cfg.config.DEFAULT_CHARSET;
 
-
 public class FileBackedTasksManager extends InMemoryTaskManager {
     private final File file;
     private static final String columnNamesCSV = "id,type,name,status,description,epic,duration,startTime";
@@ -299,5 +298,4 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             }
         }
     }
-
 }

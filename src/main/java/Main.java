@@ -1,20 +1,19 @@
 import model.*;
 import service.HttpTaskManager;
+import service.Managers;
 import service.servers.HttpTaskServer;
 import service.servers.KVServer;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 
-import static cfg.config.PORT_KV;
-
 public class Main {
     public static void main(String[] args) throws IOException {
-        KVServer kvServer = new KVServer();
+        KVServer kvServer = Managers.getDefaultKVServer();
         kvServer.runServer();
-        HttpTaskServer server = new HttpTaskServer();
-        server.runServer();
-        HttpTaskManager taskManagerHttp = new HttpTaskManager(PORT_KV);
+        HttpTaskManager taskManagerHttp = Managers.getDefault();
+        HttpTaskServer httpTaskServer = Managers.getDefaultTaskServer(taskManagerHttp);
+        httpTaskServer.runServer();
 
         Task task1 = new Task(TaskType.TASK, "Задача 1", "Описание Задача 1",
                 TaskStatus.NEW, 15,
@@ -38,7 +37,7 @@ public class Main {
         final int epicId1 = taskManagerHttp.addNewEpic(epic1);
 
         Epic epic2 = new Epic(4, TaskType.EPIC, "Эпик 2", "описание Эпик 2", TaskStatus.NEW);
-        final int epicId2 = taskManagerHttp.addNewEpic(epic2);
+        final int epicId2 =taskManagerHttp.addNewEpic(epic2);
 
         Subtask subtask1 = new Subtask(TaskType.SUBTASK, "1 Подзадача к эпику 1", "Описание Подзадачи 1",
                 TaskStatus.DONE, 15,
@@ -59,7 +58,7 @@ public class Main {
         taskManagerHttp.updateSubtask(subtaskUpdate1);
 
         HttpTaskManager serializedTasksManager = taskManagerHttp.loadFromHttp();
-
+        System.out.println(taskManagerHttp.getEpic(epicId2));
         System.out.println(serializedTasksManager.getTasks());
         System.out.println(serializedTasksManager.getEpics());
         System.out.println(serializedTasksManager.getSubtasks());

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import service.HttpTaskManager;
+import service.Managers;
 import service.servers.HttpTaskServer;
 import service.servers.KVServer;
 
@@ -22,11 +23,11 @@ public class HttpTaskManagerTest extends TaskManagerTest<HttpTaskManager> {
 
     @BeforeEach
     public void setUp() throws IOException {
-        kvServer = new KVServer();
+        kvServer = Managers.getDefaultKVServer();
         kvServer.runServer();
-        httpTaskServer = new HttpTaskServer();
-        httpTaskServer.runServer();
         taskManager = new HttpTaskManager(PORT_KV);
+        httpTaskServer = Managers.getDefaultTaskServer(taskManager);
+        httpTaskServer.runServer();
         initTasks();
     }
 

@@ -6,7 +6,6 @@ import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import model.*;
-import service.Managers;
 import service.TaskManager;
 import service.exception.NetworkingException;
 
@@ -22,14 +21,14 @@ import static cfg.config.*;
 import static service.ServerLogsUtils.sendServerMassage;
 
 public class HttpTaskServer {
-    HttpServer server;
+    private final HttpServer server;
     private final Gson gson;
     private final TaskManager taskManager;
 
-    public HttpTaskServer() throws IOException {
+    public HttpTaskServer(TaskManager taskManager) throws IOException {
         gson = GsonBuilderCreate();
-        this.taskManager = Managers.getDefault();
-        server = HttpServer.create(new InetSocketAddress(HOSTNAME, PORT_HTTP_TASKS), 0);
+        this.taskManager = taskManager;
+        this.server = HttpServer.create(new InetSocketAddress(HOSTNAME, PORT_HTTP_TASKS), 0);
         server.createContext("/tasks", this::handler);
     }
 
@@ -55,7 +54,7 @@ public class HttpTaskServer {
                         final String response = gson.toJson(pTasks);
                         h.getResponseHeaders().add(TASK_MANAGER_METHOD, "getPrioritizedTasks");
                         sendResponse(h, response, 200);
-                        sendServerMassage("Успешно обработан запрос на получение Приоритетных задач");
+                        massageGetEmptyList(response, "Приоритетных задач");
                     } else {
                         handleError(h, "requestMethodG", 404);
                     }
@@ -74,15 +73,7 @@ public class HttpTaskServer {
                         final String response = gson.toJson(allSubtasksEpic);
                         h.getResponseHeaders().add(TASK_MANAGER_METHOD, "getAllSubTaskForEpic");
                         sendResponse(h, response, 200);
-                        if (response.equals("[]")) {
-                            sendServerMassage("*Запрос на получение Подзадач у Эпика с ID=" + id + " обработан, "
-                                    + "но вернулся пустой список");
-                        } else if (response.equals("null")) {
-                            sendServerMassage("*При получении Подзадач у Эпика с ID=" + id + " клиенту вернулось "
-                                    + "значение null");
-                        } else {
-                            sendServerMassage("Успешно обработан запрос на получение Подзадач у Эпика с ID=" + id);
-                        }
+                        massageGetTaskId(response, "Подзадач у Эпика", id);
                     } else {
                         handleError(h, "requestMethodG", 404);
                     }
@@ -95,7 +86,7 @@ public class HttpTaskServer {
                         final String response = gson.toJson(history);
                         h.getResponseHeaders().add(TASK_MANAGER_METHOD, "getHistory");
                         sendResponse(h, response, 200);
-                        sendServerMassage("Успешно обработан запрос на получение Истории просмотра задач");
+                        massageGetEmptyList(response, "Истории просмотра задач");
                     } else {
                         handleError(h, "requestMethodG", 404);
                     }
@@ -117,7 +108,7 @@ public class HttpTaskServer {
                     final String response = gson.toJson(tasks);
                     h.getResponseHeaders().add(TASK_MANAGER_METHOD, "getTasks");
                     sendResponse(h, response, 200);
-                    sendServerMassage("Успешно обработан запрос на получение всех Задач");
+                    massageGetEmptyList(response, "всех Задач");
                     return;
                 }
                 String idQuery = query.substring(3);
@@ -128,12 +119,7 @@ public class HttpTaskServer {
                 final String response = gson.toJson(task);
                 h.getResponseHeaders().add(TASK_MANAGER_METHOD, "getTask");
                 sendResponse(h, response, 200);
-
-                if (!response.equals("null")) {
-                    sendServerMassage("Успешно обработан запрос на получение Задачи с ID=" + id);
-                } else {
-                    sendServerMassage("*Задачи с ID=" + id + " не существует. Клиенту выдано значение NULL");
-                }
+                massageGetTaskId(response, "Задачи", id);
             }
             case REQUEST_POST -> {
                 sendServerMassage("*Клиент сделал запрос " + h.getRequestMethod()
@@ -216,7 +202,7 @@ public class HttpTaskServer {
                     final String response = gson.toJson(subtasks);
                     h.getResponseHeaders().add(TASK_MANAGER_METHOD, "getSubtasks");
                     sendResponse(h, response, 200);
-                    sendServerMassage("Успешно обработан запрос на получение всех Подзадач");
+                    massageGetEmptyList(response, "всех Подзадач");
                     return;
                 }
                 String idQuery = query.substring(3);
@@ -227,11 +213,7 @@ public class HttpTaskServer {
                 final String response = gson.toJson(subtask);
                 h.getResponseHeaders().add(TASK_MANAGER_METHOD, "getSubtask");
                 sendResponse(h, response, 200);
-                if (!response.equals("null")) {
-                    sendServerMassage("Успешно обработан запрос на получение Подзадачи с ID=" + id);
-                } else {
-                    sendServerMassage("*Подзадачи с ID=" + id + " не существует. Клиенту выдано значение NULL");
-                }
+                massageGetTaskId(response, "Подзадачи", id);
             }
             case REQUEST_POST -> {
                 sendServerMassage("*Клиент сделал запрос " + h.getRequestMethod()
@@ -320,7 +302,7 @@ public class HttpTaskServer {
                     final String response = gson.toJson(epics);
                     h.getResponseHeaders().add(TASK_MANAGER_METHOD, "getEpics");
                     sendResponse(h, response, 200);
-                    sendServerMassage("Успешно обработан запрос на получение всех Эпиков");
+                    massageGetEmptyList(response, "всех Эпиков");
                     return;
                 }
                 String idQuery = query.substring(3);
@@ -331,11 +313,7 @@ public class HttpTaskServer {
                 final String response = gson.toJson(epic);
                 h.getResponseHeaders().add(TASK_MANAGER_METHOD, "getEpic");
                 sendResponse(h, response, 200);
-                if (!response.equals("null")) {
-                    sendServerMassage("Успешно обработан запрос на получение Эпика с ID=" + id);
-                } else {
-                    sendServerMassage("*Эпика с ID=" + id + " не существует. Клиенту выдано значение NULL");
-                }
+                massageGetTaskId(response, "Эпика", id);
             }
             case REQUEST_POST -> {
                 sendServerMassage("*Клиент сделал запрос " + h.getRequestMethod()
@@ -511,5 +489,29 @@ public class HttpTaskServer {
         boolean isHaveName = !task.getName().isEmpty();
         boolean isHaveDescription = !task.getDescription().isEmpty();
         return isTaskTypeIsValid && isTaskHaveType && isTaskHaveStatus && isHaveName && isHaveDescription;
+    }
+
+    private void massageGetEmptyList(String response, String nameList) {
+        if (response.equals("[]")) {
+            sendServerMassage("*Запрос на получение списка " + nameList + " обработан, "
+                    + "но вернулся пустой список");
+        } else {
+            sendServerMassage("Успешно обработан запрос на получение " + nameList);
+        }
+    }
+
+    private void massageGetTaskId(String response, String typeTask, int id) {
+        if (typeTask.equals("Подзадач у Эпика")) {
+            if (response.equals("[]")) {
+                sendServerMassage("*Запрос на получение " + typeTask + " с ID=" + id + " обработан, "
+                        + "но вернулся пустой список");
+                return;
+            }
+        }
+        if (!response.equals("null")) {
+            sendServerMassage("Успешно обработан запрос на получение " + typeTask + " с ID=" + id);
+        } else {
+            sendServerMassage("*" + typeTask + " с ID=" + id + " не существует. Клиенту выдано значение NULL");
+        }
     }
 }

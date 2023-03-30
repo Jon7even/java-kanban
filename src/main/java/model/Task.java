@@ -128,5 +128,4 @@ public class Task {
         return id + "," + type + "," + name + "," + status + "," + description + "," + duration + ","
                 + startTimeToString + ",\n";
     }
-
 }

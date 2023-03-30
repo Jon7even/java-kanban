@@ -19,7 +19,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, Subtask> subTasks = new HashMap<>();
     protected final Map<Integer, Boolean> yearlyTimeTable = new HashMap<>();
     protected final HistoryManager historyManager = Managers.getDefaultHistory();
-    Comparator<Task> taskComparator = Comparator.comparing(Task::getStartTime,
+    protected final Comparator<Task> taskComparator = Comparator.comparing(Task::getStartTime,
             Comparator.nullsLast(Comparator.naturalOrder())).thenComparing(Task::getId);
     protected final TreeSet<Task> prioritizedTasks = new TreeSet<>(taskComparator);
     protected int idGenerate = 0;
@@ -420,5 +420,4 @@ public class InMemoryTaskManager implements TaskManager {
             updateYearlyTimeTableTask(startTime, endTime);
         }
     }
-
 }

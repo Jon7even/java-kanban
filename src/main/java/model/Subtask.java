@@ -53,5 +53,4 @@ public class Subtask extends Task {
         return id + "," + type + "," + name + "," + status + "," + description + "," + duration + ","
                 + startTimeToString + "," + relationEpicId + ",\n";
     }
-
 }

@@ -37,7 +37,7 @@ public class KVTaskClient {
     public String load(String key) {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().GET()
-                .uri(URI.create(url + "load/"+ key + "?API_TOKEN=" + apiToken)).build();
+                .uri(URI.create(url + "load/" + key + "?API_TOKEN=" + apiToken)).build();
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             int status = response.statusCode();
@@ -52,7 +52,7 @@ public class KVTaskClient {
 
     public void put(String key, String value) {
         HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url + "save/"+ key + "?API_TOKEN=" + apiToken))
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url + "save/" + key + "?API_TOKEN=" + apiToken))
                 .POST(HttpRequest.BodyPublishers.ofString(value)).build();
         try {
             HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());

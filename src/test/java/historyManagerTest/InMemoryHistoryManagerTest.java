@@ -1,11 +1,10 @@
 package historyManagerTest;
 
 import model.*;
-import service.HistoryManager;
-import service.InMemoryHistoryManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import service.HistoryManager;
+import service.InMemoryHistoryManager;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

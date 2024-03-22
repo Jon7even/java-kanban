@@ -1,3 +1,12 @@
-# java-kanban
-Hello, this repository for homework project.
-Version 3.17
+# Task Manager v3.17
+> Трекер задач позволяет справиться с рутиной планирования и вы всегда будете знать о том, 
+> как "есть слона по частям правильно", а данное приложение станет хорошим помощником.
+
+> [!IMPORTANT]
+> Создано с помощью:
+- Java 11
+- JUnit 5.8.1
+- Gson 2.9.0
+- HttpClient Java
+- HttpServer Java
+- RESTful

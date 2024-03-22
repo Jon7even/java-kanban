@@ -3,8 +3,8 @@ package service;
 import model.Task;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
     public InMemoryHistoryManager() {

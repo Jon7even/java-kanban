@@ -1,15 +1,15 @@
 package service.servers;
 
-import static cfg.config.*;
-import static service.ServerLogsUtils.sendServerMassage;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpServer;
+import static cfg.config.*;
+import static service.ServerLogsUtils.sendServerMassage;
 
 public class KVServer {
     private final String apiToken;

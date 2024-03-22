@@ -28,15 +28,15 @@ public class HttpTaskManager extends FileBackedTasksManager {
     @Override
     protected void save() {
         try {
-        String jsonTasks = gson.toJson(new ArrayList<>(tasks.values()));
-        client.put("tasks", jsonTasks);
-        String jsonEpic = gson.toJson(new ArrayList<>(epicTasks.values()));
-        client.put("epics", jsonEpic);
-        String jsonSubtask = gson.toJson(new ArrayList<>(subTasks.values()));
-        client.put("subtasks", jsonSubtask);
-        String jsonHistory = gson.toJson(historyManager.getHistory().stream().map(Task::getId)
-                .collect(Collectors.toList()));
-        client.put("history", jsonHistory);
+            String jsonTasks = gson.toJson(new ArrayList<>(tasks.values()));
+            client.put("tasks", jsonTasks);
+            String jsonEpic = gson.toJson(new ArrayList<>(epicTasks.values()));
+            client.put("epics", jsonEpic);
+            String jsonSubtask = gson.toJson(new ArrayList<>(subTasks.values()));
+            client.put("subtasks", jsonSubtask);
+            String jsonHistory = gson.toJson(historyManager.getHistory().stream().map(Task::getId)
+                    .collect(Collectors.toList()));
+            client.put("history", jsonHistory);
         } catch (Exception e) {
             throw new NetworkingException("*HttpTaskManager: во время сохранения данных в БД произошла ошибка: ", e);
         }

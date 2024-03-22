@@ -1,15 +1,17 @@
 package taskManagerTest;
 
 import model.*;
+import org.junit.jupiter.api.Test;
 import service.TaskManager;
 import service.exception.ManagerTimeIntersectionsException;
-
-import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public abstract class TaskManagerTest<T extends TaskManager> {
     protected T taskManager;

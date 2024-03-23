@@ -7,7 +7,7 @@ import service.servers.KVServer;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
-public class Main {
+public class TaskManagerApp {
     public static void main(String[] args) throws IOException {
         KVServer kvServer = Managers.getDefaultKVServer();
         kvServer.runServer();
@@ -37,7 +37,7 @@ public class Main {
         final int epicId1 = taskManagerHttp.addNewEpic(epic1);
 
         Epic epic2 = new Epic(4, TaskType.EPIC, "Эпик 2", "описание Эпик 2", TaskStatus.NEW);
-        final int epicId2 =taskManagerHttp.addNewEpic(epic2);
+        final int epicId2 = taskManagerHttp.addNewEpic(epic2);
 
         Subtask subtask1 = new Subtask(TaskType.SUBTASK, "1 Подзадача к эпику 1", "Описание Подзадачи 1",
                 TaskStatus.DONE, 15,
